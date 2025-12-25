@@ -81,9 +81,9 @@ WSGI_APPLICATION = 'lost_found.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASE_URL = config('DATABASE_URL', default='')
+DATABASE_URL = config('DATABASE_URL', default=None)
 
-if DATABASE_URL and DATABASE_URL.strip():
+if DATABASE_URL and DATABASE_URL.strip() and '://' in DATABASE_URL:
     import dj_database_url
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL)
