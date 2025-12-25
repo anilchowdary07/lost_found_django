@@ -1,0 +1,525 @@
+{% extends 'base.html' %}
+
+{% block title %}Karma Leaderboard - Campus Lost & Found{% endblock %}
+
+{% block extra_css %}
+<style>
+    .leaderboard-hero {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+        padding: 3rem 2rem;
+        border-radius: var(--radius);
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .leaderboard-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="rgba(245,158,11,0.05)"/></svg>') repeat;
+        opacity: 0.5;
+    }
+    .leaderboard-hero .container {
+        position: relative;
+        z-index: 1;
+    }
+    .leaderboard-title {
+        font-size: 2.25rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #dc2626, #ea580c);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .leaderboard-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.8;
+        margin-bottom: 2rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+    }
+    .community-stats {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+    .community-stat {
+        text-align: center;
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 1rem 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    .community-stat-number {
+        font-size: 1.5rem;
+        font-weight: 800;
+        display: block;
+        color: #dc2626;
+        margin-bottom: 0.25rem;
+    }
+    .community-stat-label {
+        font-size: 0.85rem;
+        opacity: 0.7;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .user-stats-section {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 30px rgba(2,6,23,0.04);
+        border: 1px solid rgba(255,255,255,0.8);
+    }
+    .user-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+    .user-stat-card {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid rgba(59,130,246,0.2);
+        transition: all 0.3s ease;
+    }
+    .user-stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(59,130,246,0.15);
+    }
+    .user-stat-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    .user-stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1e40af;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .user-stat-label {
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .leaderboard-container {
+        background: var(--surface);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(2,6,23,0.04);
+        border: 1px solid rgba(255,255,255,0.8);
+    }
+    .leaderboard-header {
+        background: linear-gradient(90deg, #fef3c7 0%, #fde68a 100%);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .leaderboard-header h3 {
+        margin: 0;
+        color: #92400e;
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+    .leaderboard-table {
+        margin: 0;
+    }
+    .leaderboard-table thead th {
+        background: #f9fafb;
+        border-bottom: 2px solid #e5e7eb;
+        padding: 1rem 1.5rem;
+        font-weight: 700;
+        color: #374151;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .leaderboard-row {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .leaderboard-row:hover {
+        background: #f9fafb;
+    }
+    .leaderboard-row.current-user {
+        background: linear-gradient(90deg, #fef3c7 0%, #fde68a 50%, #fef3c7 100%);
+        border-left: 4px solid #f59e0b;
+    }
+    .rank-cell {
+        padding: 1.5rem 1rem;
+        text-align: center;
+        width: 80px;
+    }
+    .rank-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, #9ca3af, #6b7280);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .rank-badge.rank-1 {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        box-shadow: 0 4px 15px rgba(245,158,11,0.3);
+    }
+    .rank-badge.rank-2 {
+        background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+        color: #374151;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .rank-badge.rank-3 {
+        background: linear-gradient(135deg, #d97706, #b45309);
+        box-shadow: 0 4px 15px rgba(217,119,6,0.3);
+    }
+    .user-cell {
+        padding: 1.5rem 1rem;
+    }
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    .user-details h4 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1f2937;
+    }
+    .user-details .username {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin: 0;
+    }
+    .current-user-indicator {
+        color: #f59e0b;
+        margin-left: 0.5rem;
+    }
+    .karma-cell, .items-cell {
+        padding: 1.5rem 1rem;
+        text-align: center;
+    }
+    .karma-points {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #dc2626;
+        display: block;
+    }
+    .items-returned {
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-weight: 600;
+    }
+    .empty-state-section {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: 0 8px 30px rgba(2,6,23,0.04);
+        border: 1px solid rgba(255,255,255,0.8);
+    }
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.6;
+    }
+    .empty-state-section h5 {
+        color: #1e293b;
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+    .empty-state-section p {
+        color: #64748b;
+        margin-bottom: 2rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .how-it-works-section {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        margin-top: 2rem;
+        box-shadow: 0 8px 30px rgba(2,6,23,0.04);
+        border: 1px solid rgba(255,255,255,0.8);
+    }
+    .how-it-works-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f1f5f9;
+    }
+    .how-it-works-icon {
+        font-size: 1.5rem;
+        color: #f59e0b;
+    }
+    .how-it-works-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+    .how-it-works-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .how-it-works-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .how-it-works-item:last-child {
+        border-bottom: none;
+    }
+    .how-it-works-number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+    .how-it-works-content {
+        flex: 1;
+    }
+    .how-it-works-content strong {
+        color: #dc2626;
+        font-weight: 700;
+    }
+    @media (max-width: 768px) {
+        .leaderboard-hero {
+            padding: 2.5rem 1rem;
+        }
+        .leaderboard-title {
+            font-size: 1.875rem;
+        }
+        .community-stats {
+            gap: 1rem;
+        }
+        .community-stat {
+            padding: 0.75rem 1rem;
+        }
+        .community-stat-number {
+            font-size: 1.25rem;
+        }
+        .user-stats-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        .leaderboard-table {
+            font-size: 0.9rem;
+        }
+        .rank-cell {
+            padding: 1rem 0.5rem;
+            width: 60px;
+        }
+        .rank-badge {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+        .user-cell {
+            padding: 1rem 0.5rem;
+        }
+        .karma-cell, .items-cell {
+            padding: 1rem 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="leaderboard-hero">
+    <div class="container">
+        <h1 class="leaderboard-title">🏆 Karma Leaderboard</h1>
+        <p class="leaderboard-subtitle">Celebrate the most helpful finders on campus. Every returned item makes a difference!</p>
+        <div class="community-stats">
+            <div class="community-stat">
+                <span class="community-stat-number">{{ total_participants }}</span>
+                <span class="community-stat-label">Active Heroes</span>
+            </div>
+            <div class="community-stat">
+                <span class="community-stat-number">{{ total_items_returned }}</span>
+                <span class="community-stat-label">Items Returned</span>
+            </div>
+            <div class="community-stat">
+                <span class="community-stat-number">{{ total_karma_points }}</span>
+                <span class="community-stat-label">Total Karma</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if user.is_authenticated %}
+<section class="user-stats-section">
+    <div class="user-stats-grid">
+        <div class="user-stat-card">
+            <span class="user-stat-icon">⭐</span>
+            <span class="user-stat-number">{{ user_karma }}</span>
+            <span class="user-stat-label">Your Karma Points</span>
+        </div>
+        <div class="user-stat-card">
+            <span class="user-stat-icon">🏅</span>
+            <span class="user-stat-number">#{{ user_rank }}</span>
+            <span class="user-stat-label">Your Rank</span>
+        </div>
+        <div class="user-stat-card">
+            <span class="user-stat-icon">🔄</span>
+            <span class="user-stat-number">{{ user_items_returned }}</span>
+            <span class="user-stat-label">Items Returned</span>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="leaderboard-container">
+    <div class="leaderboard-header">
+        <h3>🏆 Top Campus Heroes</h3>
+    </div>
+
+    {% if leaderboard %}
+    <table class="leaderboard-table table">
+        <thead>
+            <tr>
+                <th class="rank-cell">Rank</th>
+                <th class="user-cell">Finder</th>
+                <th class="karma-cell">Karma Points</th>
+                <th class="items-cell">Items Returned</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for profile in leaderboard %}
+            <tr class="leaderboard-row {% if user.is_authenticated and profile.user == user %}current-user{% endif %}">
+                <td class="rank-cell">
+                    <div class="rank-badge {% if forloop.counter == 1 %}rank-1{% elif forloop.counter == 2 %}rank-2{% elif forloop.counter == 3 %}rank-3{% else %}rank-other{% endif %}">
+                        {% if forloop.counter == 1 %}🥇
+                        {% elif forloop.counter == 2 %}🥈
+                        {% elif forloop.counter == 3 %}🥉
+                        {% else %}{{ forloop.counter }}{% endif %}
+                    </div>
+                </td>
+                <td class="user-cell">
+                    <div class="user-info">
+                        {% if profile.profile_photo %}
+                        <img src="{{ profile.profile_photo }}" alt="{{ profile.user.username }}" class="user-avatar" style="border-radius: 50%; object-fit: cover;">
+                        {% else %}
+                        <div class="user-avatar">
+                            {{ profile.user.get_full_name|default:profile.user.username|slice:":1"|upper }}
+                        </div>
+                        {% endif %}
+                        <div class="user-details">
+                            <h4>
+                                {{ profile.user.get_full_name|default:profile.user.username }}
+                                {% if user.is_authenticated and profile.user == user %}
+                                <span class="current-user-indicator">⭐</span>
+                                {% endif %}
+                            </h4>
+                            <p class="username">@{{ profile.user.username }}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="karma-cell">
+                    <span class="karma-points">{{ profile.karma_points }}</span>
+                </td>
+                <td class="items-cell">
+                    <span class="items-returned">{{ profile.total_items_returned }}</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state-section">
+        <div class="empty-state-icon">📊</div>
+        <h5>No Karma Earned Yet</h5>
+        <p>Start finding items and returning them to earn karma points and climb the leaderboard!</p>
+        {% if user.is_authenticated %}
+        <a href="{% url 'items:report_item' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Report Found Item
+        </a>
+        {% else %}
+        <a href="{% url 'accounts:login' %}" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt me-1"></i>Login to Get Started
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+
+<section class="how-it-works-section">
+    <div class="how-it-works-header">
+        <span class="how-it-works-icon">📋</span>
+        <h2 class="how-it-works-title">How Karma Works</h2>
+    </div>
+
+    <ul class="how-it-works-list">
+        <li class="how-it-works-item">
+            <div class="how-it-works-number">1</div>
+            <div class="how-it-works-content">
+                Earn <strong>50 Karma Points</strong> each time someone successfully claims and returns an item you found
+            </div>
+        </li>
+        <li class="how-it-works-item">
+            <div class="how-it-works-number">2</div>
+            <div class="how-it-works-content">
+                The more items you help return, the higher your rank climbs on the leaderboard
+            </div>
+        </li>
+        <li class="how-it-works-item">
+            <div class="how-it-works-number">3</div>
+            <div class="how-it-works-content">
+                Top finders are recognized and celebrated for their contribution to the campus community
+            </div>
+        </li>
+        <li class="how-it-works-item">
+            <div class="how-it-works-number">4</div>
+            <div class="how-it-works-content">
+                Karma rewards honesty and the spirit of helping others find their lost belongings
+            </div>
+        </li>
+    </ul>
+</section>
+{% endblock %}

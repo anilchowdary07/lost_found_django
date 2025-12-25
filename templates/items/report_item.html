@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Item - Campus Lost & Found{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-check-input {
+        cursor: pointer;
+    }
+    .form-check {
+        padding: 1rem;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+        margin-bottom: 0.5rem;
+    }
+    .form-check.checked {
+        border-color: #3b82f6;
+        background: #f0f9ff;
+    }
+    .form-check-label {
+        cursor: pointer;
+        margin-bottom: 0;
+        user-select: none;
+        font-weight: 600;
+    }
+    .item-type-container {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    .item-type-container .form-check {
+        flex: 1;
+        min-width: 200px;
+        text-align: center;
+    }
+    .img-preview {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-5">
+                <h2 class="card-title mb-1">Report Item</h2>
+                <p class="text-muted mb-4">Upload an image of your lost or found item</p>
+
+                <form method="post" enctype="multipart/form-data" id="reportForm">
+                    {% csrf_token %}
+
+                    <!-- Item Type Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">What type of item are you reporting?</label>
+                        <div class="item-type-container" id="itemTypeContainer">
+                            {{ form.item_type }}
+                        </div>
+                        {% if form.item_type.errors %}
+                            <div class="text-danger small mt-2">
+                                {% for error in form.item_type.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <br>
+                    <br>
+
+                    <!-- Image Upload Section -->
+                    <div class="mb-4">
+                        <br>
+                        <label for="imageInput" class="form-label fw-bold">Item Image</label>
+                        <div class="input-group">
+                            {{ form.image }}
+                        </div>
+                        {% if form.image.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.image.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted d-block mt-2">
+                            Supported: JPG, PNG, GIF, WebP (max 5MB)
+                        </small>
+
+                        <!-- Image Preview -->
+                        <div id="imagePreview" class="mt-3 hidden">
+                            <img id="previewImg" src="" alt="Preview" class="img-preview">
+                        </div>
+                    </div>
+
+
+
+                    <!-- Form Fields -->
+                    <div class="mb-3">
+                        <label for="titleInput" class="form-label fw-bold">Title</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.title.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="locationInput" class="form-label fw-bold">Location</label>
+                        {{ form.location }}
+                        {% if form.location.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.location.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descriptionInput" class="form-label fw-bold">Description (Optional)</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.description.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="categorySelect" class="form-label fw-bold">Category</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.category.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="manualTags" class="form-label fw-bold">Additional Tags</label>
+                        {{ form.manual_tags }}
+                        {% if form.manual_tags.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.manual_tags.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">Enter tags separated by commas</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Submit Report</button>
+                        <a href="{% url 'items:dashboard' %}" class="btn btn-secondary btn-lg">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const imageInput = document.getElementById('id_image');
+const previewImg = document.getElementById('previewImg');
+const imagePreview = document.getElementById('imagePreview');
+
+if (imageInput) {
+    imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            previewImg.src = event.target.result;
+            imagePreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+    const typeClass = type === 'error' ? 'danger' : type;
+    const typeIcon = type === 'error' ? '✕' : type === 'success' ? '✓' : 'ℹ';
+    const typeTitle = type === 'error' ? 'Error' : type === 'success' ? 'Success' : 'Info';
+    
+    const toastHTML = `
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-${typeClass}">
+                <strong class="me-auto text-white">${typeIcon} ${typeTitle}</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+    const toastElement = toastContainer.lastElementChild;
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+    
+    toastElement.addEventListener('hidden.bs.toast', function() {
+        toastElement.remove();
+    });
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    document.body.appendChild(container);
+    return container;
+}
+
+function validateForm() {
+    const title = document.getElementById('id_title').value.trim();
+    const location = document.getElementById('id_location').value.trim();
+    const imageInput = document.getElementById('id_image');
+    const description = document.getElementById('id_description').value.trim();
+    
+    let errors = [];
+    
+    if (!title) {
+        errors.push('Title is required');
+    } else if (title.length < 3) {
+        errors.push('Title must be at least 3 characters');
+    } else if (title.length > 200) {
+        errors.push('Title cannot exceed 200 characters');
+    }
+    
+    if (!location) {
+        errors.push('Location is required');
+    } else if (location.length < 3) {
+        errors.push('Location must be at least 3 characters');
+    } else if (location.length > 300) {
+        errors.push('Location cannot exceed 300 characters');
+    }
+    
+    if (description && description.length > 2000) {
+        errors.push('Description cannot exceed 2000 characters');
+    }
+    
+    if (!imageInput.files || imageInput.files.length === 0) {
+        errors.push('Please upload an image');
+    } else {
+        const file = imageInput.files[0];
+        const maxSize = 5 * 1024 * 1024;
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+        
+        if (file.size > maxSize) {
+            errors.push('Image size must be less than 5MB');
+        }
+        
+        if (!allowedTypes.includes(file.type)) {
+            errors.push('Please upload a valid image file (JPG, PNG, GIF, or WebP)');
+        }
+        
+        const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+        if (!allowedExtensions.includes(fileExt)) {
+            errors.push('File extension not allowed. Use JPG, PNG, GIF, or WebP');
+        }
+    }
+    
+    const manualTags = document.getElementById('manualTags').value.trim();
+    if (manualTags) {
+        const tagsList = manualTags.split(',').map(t => t.trim()).filter(t => t);
+        if (tagsList.length > 10) {
+            errors.push('Maximum 10 tags allowed');
+        }
+        for (const tag of tagsList) {
+            if (tag.length > 50) {
+                errors.push(`Tag "${tag}" exceeds 50 characters`);
+                break;
+            }
+            if (!/^[a-zA-Z0-9\s-]+$/.test(tag)) {
+                errors.push(`Tag "${tag}" contains invalid characters. Use only letters, numbers, spaces, and hyphens`);
+                break;
+            }
+        }
+    }
+    
+    return errors;
+}
+
+document.getElementById('reportForm').addEventListener('submit', (e) => {
+    const errors = validateForm();
+    
+    if (errors.length > 0) {
+        e.preventDefault();
+        errors.forEach(error => showToast(error, 'error'));
+        return false;
+    }
+    
+    const submitBtn = document.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Submitting...';
+});
+
+function setupRadioButtons() {
+    const radioButtons = document.querySelectorAll('input[name="item_type"]');
+    
+    function updateRadioStyles() {
+        radioButtons.forEach(radio => {
+            const formCheck = radio.closest('.form-check');
+            if (formCheck) {
+                if (radio.checked) {
+                    formCheck.classList.add('checked');
+                } else {
+                    formCheck.classList.remove('checked');
+                }
+            }
+        });
+    }
+    
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', updateRadioStyles);
+    });
+    
+    updateRadioStyles();
+}
+
+setupRadioButtons();
+</script>
+{% endblock %}

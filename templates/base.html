@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Campus Lost & Found{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/site.css' %}">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23007bff' width='100' height='100'/><text x='50' y='65' font-size='60' font-weight='bold' fill='white' text-anchor='middle'>L&F</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23007bff' width='180' height='180' rx='40'/><text x='90' y='120' font-size='80' font-weight='bold' fill='white' text-anchor='middle'>L&F</text></svg>">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'items:dashboard' %}">
+                <span class="brand-mark me-2" aria-hidden="true">
+                    <i class="fas fa-search"></i>
+                </span>
+                <span class="brand-text">Lost &amp; Found</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'items:dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'items:found_items_gallery' %}">Found</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'items:lost_items_gallery' %}">Lost</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'items:leaderboard' %}">Leaderboard</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-primary" href="{% url 'items:report_item' %}">
+                                <i class="fas fa-plus me-1"></i>Report
+                            </a>
+                        </li>
+                        <li class="nav-item d-none d-lg-block">
+                            <a class="nav-link" href="{% url 'items:notifications' %}">
+                                <i class="fas fa-bell me-1"></i>Notifications
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <button id="themeToggle" class="nav-link" title="Toggle theme">
+                                <i class="fas fa-moon"></i>
+                            </button>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user me-1"></i>{{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                    <i class="fas fa-user-circle me-2"></i>Profile
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <button id="themeToggle" class="nav-link" title="Toggle theme">
+                                <i class="fas fa-moon"></i>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:login' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-primary" href="{% url 'accounts:signup' %}">
+                                <i class="fas fa-user-plus me-1"></i>Sign up
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
+
+    <div class="container main-container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="footer">
+        <div class="container text-center py-4">
+            <p class="mb-0 muted">&copy; 2025 Campus Lost &amp; Found — Built for campus communities.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global modal backdrop cleanup function
+        function globalModalCleanup() {
+            document.querySelectorAll('.modal-backdrop').forEach(el => {
+                el.style.display = 'none';
+                el.style.opacity = '0';
+                el.style.pointerEvents = 'none';
+                el.remove();
+            });
+            document.body.classList.remove('modal-open');
+            document.body.style.paddingRight = '';
+            document.body.style.overflow = '';
+        }
+
+        // Run cleanup on page load and periodically
+        document.addEventListener('DOMContentLoaded', function() {
+            globalModalCleanup();
+            
+            // Clean up every 2 seconds if no modals are open
+            setInterval(() => {
+                if (!document.querySelector('.modal.show')) {
+                    globalModalCleanup();
+                }
+            }, 2000);
+            
+            const toastContainer = document.getElementById('toastContainer');
+            
+            {% if messages %}
+                {% for message in messages %}
+                    const toastHTML = `
+                        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header bg-{{ message.tags|default:'info' }}">
+                                <strong class="me-auto text-white">
+                                    {% if message.tags == 'success' %}
+                                        ✓ Success
+                                    {% elif message.tags == 'error' %}
+                                        ✕ Error
+                                    {% elif message.tags == 'warning' %}
+                                        ⚠ Warning
+                                    {% else %}
+                                        ℹ Info
+                                    {% endif %}
+                                </strong>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                {{ message }}
+                            </div>
+                        </div>
+                    `;
+                    
+                    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                    const toastElement = toastContainer.lastElementChild;
+                    const toast = new bootstrap.Toast(toastElement);
+                    toast.show();
+                    
+                    toastElement.addEventListener('hidden.bs.toast', function() {
+                        toastElement.remove();
+                    });
+                {% endfor %}
+            {% endif %}
+        });
+        
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const icon = themeToggle.querySelector('i');
+        
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-bs-theme', currentTheme);
+        icon.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        });
+
+        // Ensure dropdown functionality works
+        const dropdownToggle = document.querySelector('#userDropdown');
+        if (dropdownToggle) {
+            // Force Bootstrap dropdown initialization
+            const dropdown = new bootstrap.Dropdown(dropdownToggle);
+        }
+    </script>
+    
+    <script>
+        // Global defensive handlers to prevent stuck modal backdrops
+        (function() {
+            function cleanupBackdrops() {
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.paddingRight = '';
+            }
+
+            document.addEventListener('show.bs.modal', function() {
+                // remove any leftover backdrops before showing a new modal
+                try { cleanupBackdrops(); } catch (e) { console.warn('Backdrop cleanup failed', e); }
+            }, true);
+
+            document.addEventListener('hidden.bs.modal', function() {
+                // ensure cleanup after modal hides
+                try { cleanupBackdrops(); } catch (e) { console.warn('Backdrop cleanup failed', e); }
+            }, true);
+        })();
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

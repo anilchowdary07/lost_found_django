@@ -1,0 +1,935 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Campus Lost & Found{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        color: #1e293b;
+        padding: 4rem 2rem;
+        border-radius: var(--radius);
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="rgba(79,70,229,0.05)"/></svg>') repeat;
+        opacity: 0.5;
+    }
+    .hero-section .container {
+        position: relative;
+        z-index: 1;
+    }
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, var(--brand-start), var(--brand-end));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .hero-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.8;
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+    }
+    .hero-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+    }
+    .hero-actions .btn {
+        padding: 0.875rem 2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-actions .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    .hero-actions .btn:hover::before {
+        left: 100%;
+    }
+    .stats-bar {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+    .stat-item {
+        text-align: center;
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        border: 1px solid rgba(255,255,255,0.2);
+        transition: all 0.3s ease;
+    }
+    .stat-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        display: block;
+        color: var(--brand-start);
+        margin-bottom: 0.5rem;
+    }
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.7;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .filter-section {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 30px rgba(2,6,23,0.04);
+        border: 1px solid rgba(255,255,255,0.8);
+    }
+    .filter-section .form-control,
+    .filter-section .form-select {
+        border: 1px solid #e6e9ef;
+        border-radius: 12px;
+        padding: 0.875rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+    .filter-section .form-control:focus,
+    .filter-section .form-select:focus {
+        border-color: var(--brand-start);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        transform: translateY(-1px);
+    }
+    .filter-section .btn {
+        padding: 0.875rem 1.5rem;
+        font-weight: 600;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    .filter-section .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.15);
+    }
+    .items-section {
+        margin-top: 2rem;
+    }
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .item-card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(2,6,23,0.06);
+        border: 1px solid rgba(255,255,255,0.8);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+    }
+    .item-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(2,6,23,0.12);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+    .item-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--brand-start), var(--brand-end));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .item-card:hover::before {
+        opacity: 1;
+    }
+    .item-image {
+        height: 200px;
+        overflow: hidden;
+        position: relative;
+    }
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .item-card:hover .item-image img {
+        transform: scale(1.05);
+    }
+    .item-image-placeholder {
+        width: 100%;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        color: #94a3b8;
+    }
+    .item-content {
+        padding: 1.5rem;
+    }
+    .item-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        color: #1e293b;
+        line-height: 1.4;
+    }
+    .item-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+    .item-badges .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+    .item-location {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #64748b;
+        margin-bottom: 0.75rem;
+    }
+    .item-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.375rem;
+        margin-bottom: 1rem;
+    }
+    .item-tags .badge {
+        background: #f1f5f9 !important;
+        color: var(--brand-start) !important;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+    .item-footer {
+        padding: 1rem 1.5rem 1.5rem;
+        border-top: 1px solid #f1f5f9;
+        background: #fafbfc;
+    }
+    .claim-btn {
+        width: 100%;
+        padding: 0.75rem;
+        font-weight: 600;
+        border-radius: 10px;
+    }
+    .item-footer .btn {
+        padding: 0.75rem;
+        font-weight: 600;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+    .claim-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
+    }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: 0 8px 30px rgba(2,6,23,0.04);
+        border: 1px solid rgba(255,255,255,0.8);
+    }
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.6;
+    }
+    .empty-state h5 {
+        color: #1e293b;
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+    .empty-state p {
+        color: #64748b;
+        margin-bottom: 2rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .results-count {
+        background: rgba(79, 70, 229, 0.05);
+        border: 1px solid rgba(79, 70, 229, 0.1);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        color: #1e293b;
+    }
+    .results-count strong {
+        color: var(--brand-start);
+        font-weight: 700;
+    }
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 3rem 1rem;
+        }
+        .hero-title {
+            font-size: 2rem;
+        }
+        .hero-subtitle {
+            font-size: 1rem;
+        }
+        .stats-bar {
+            gap: 1rem;
+        }
+        .stat-item {
+            padding: 1rem 1.5rem;
+        }
+        .stat-number {
+            font-size: 1.5rem;
+        }
+        .filter-section {
+            padding: 1.5rem;
+        }
+        .cards-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        .item-card {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+<div class="container-fluid px-3 py-2">
+    {% for message in messages %}
+        {% if message.tags == 'success' %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>Success!</strong> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% elif message.tags == 'error' %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Error!</strong> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% elif message.tags == 'warning' %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <strong>Warning!</strong> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+<section class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">Welcome to Campus Lost & Found</h1>
+        <p class="hero-subtitle">Helping reunite lost items with their owners. Report found items or search for what you've lost.</p>
+        <div class="hero-actions">
+            <a href="{% url 'items:report_item' %}" class="btn btn-primary">Report Item</a>
+            <a href="{% url 'items:found_items_gallery' %}" class="btn btn-outline-primary">Browse Found Items</a>
+            <a href="{% url 'items:lost_items_gallery' %}" class="btn btn-outline-primary">Browse Lost Items</a>
+        </div>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-number">{{ total_items|default:0 }}</span>
+                <span class="stat-label">Items Reported</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ returned_items|default:0 }}</span>
+                <span class="stat-label">Items Returned</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ active_users|default:0 }}</span>
+                <span class="stat-label">Active Users</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="filter-section">
+    <form method="get" class="row g-3" id="filterForm">
+        <div class="col-12 col-md-6 col-lg-3">
+            <label for="search" class="form-label fw-semibold">Search Items</label>
+            <input type="text" id="search" name="search" class="form-control" placeholder="Search by title, description, or tags..." value="{{ search_query }}">
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <label for="category" class="form-label fw-semibold">Category</label>
+            <select id="category" name="category" class="form-select">
+                <option value="">All Categories</option>
+                <option value="electronics" {% if category_filter == 'electronics' %}selected{% endif %}>⚡ Electronics</option>
+                <option value="clothing" {% if category_filter == 'clothing' %}selected{% endif %}>👔 Clothing</option>
+                <option value="accessories" {% if category_filter == 'accessories' %}selected{% endif %}>💍 Accessories</option>
+                <option value="books" {% if category_filter == 'books' %}selected{% endif %}>📚 Books</option>
+                <option value="jewelry" {% if category_filter == 'jewelry' %}selected{% endif %}>💎 Jewelry</option>
+                <option value="documents" {% if category_filter == 'documents' %}selected{% endif %}>📄 Documents</option>
+                <option value="keys" {% if category_filter == 'keys' %}selected{% endif %}>🔑 Keys</option>
+                <option value="other" {% if category_filter == 'other' %}selected{% endif %}>📦 Other</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <label for="status" class="form-label fw-semibold">Status</label>
+            <select id="status" name="status" class="form-select">
+                <option value="">All Statuses</option>
+                <option value="reported" {% if status_filter == 'reported' %}selected{% endif %}>Reported</option>
+                <option value="claimed" {% if status_filter == 'claimed' %}selected{% endif %}>Claimed</option>
+                <option value="verified" {% if status_filter == 'verified' %}selected{% endif %}>Verified</option>
+                <option value="returned" {% if status_filter == 'returned' %}selected{% endif %}>Returned</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <label for="date_from" class="form-label fw-semibold">Date From</label>
+            <input type="date" id="date_from" name="date_from" class="form-control" value="{{ date_from }}">
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <label for="date_to" class="form-label fw-semibold">Date To</label>
+            <input type="date" id="date_to" name="date_to" class="form-control" value="{{ date_to }}">
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <label for="tags" class="form-label fw-semibold">Tags</label>
+            <input type="text" id="tags" name="tags" class="form-control" placeholder="e.g., red, leather" value="{{ tags_filter }}" title="Search by tags (comma-separated)">
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <label for="sort" class="form-label fw-semibold">Sort By</label>
+            <select id="sort" name="sort" class="form-select">
+                <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+                <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest First</option>
+                <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title A-Z</option>
+                <option value="location" {% if sort_by == 'location' %}selected{% endif %}>Location</option>
+                <option value="category" {% if sort_by == 'category' %}selected{% endif %}>Category</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-3 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">Search</button>
+            <button type="button" id="proximityBtn" class="btn btn-info" title="Search nearby items using your location">
+                📍 Nearby
+            </button>
+            <a href="/" id="clearBtn" class="btn btn-outline-secondary {% if not search_query and not category_filter and not status_filter and not date_from and not date_to and not tags_filter %}d-none{% endif %}">Clear</a>
+        </div>
+    </form>
+</section>
+
+<!-- Results Count -->
+{% if search_query or category_filter or status_filter or date_from or date_to or tags_filter %}
+<div class="results-count">
+    <p class="mb-0">
+        {% if items %}
+            Found <strong>{{ items|length }}</strong> item{{ items|length|pluralize }}
+            {% if search_query %}matching "<strong>{{ search_query }}</strong>"{% endif %}
+            {% if category_filter %}in <strong>{{ category_filter|title }}</strong>{% endif %}
+            {% if status_filter %}with status <strong>{{ status_filter|title }}</strong>{% endif %}
+            {% if tags_filter %}tagged with <strong>{{ tags_filter }}</strong>{% endif %}
+            {% if date_from or date_to %}from the selected date range{% endif %}
+        {% else %}
+            No items found matching your criteria.
+        {% endif %}
+    </p>
+</div>
+{% endif %}
+
+<section class="items-section">
+    {% if items %}
+    <div class="cards-grid">
+        {% for item in items %}
+        <div class="item-card" onclick="location.href='{% url 'items:item_detail' item.id %}'">
+            {% if item.image_url %}
+            <div class="item-image">
+                <img src="{{ item.image_url }}" class="img-cover" alt="{{ item.title }}">
+            </div>
+            {% else %}
+            <div class="item-image-placeholder">
+                <span>📦</span>
+            </div>
+            {% endif %}
+
+            <div class="item-content">
+                <h5 class="item-title">{{ item.title }}</h5>
+
+                <div class="item-badges">
+                    <span class="badge bg-info">{{ item.get_category_display }}</span>
+                    <span class="badge {% if item.status == 'reported' %}bg-secondary{% elif item.status == 'claimed' %}bg-warning{% elif item.status == 'verified' %}bg-primary{% else %}bg-success{% endif %}">
+                        {{ item.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="item-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>{{ item.location }}</span>
+                </div>
+
+                {% if item.ai_tags %}
+                <div class="item-tags">
+                    {% for tag in item.ai_tags %}
+                        <span class="badge">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="text-muted small">
+                    <i class="fas fa-calendar-alt me-1"></i>{{ item.created_at|date:"M d, Y" }}
+                </div>
+            </div>
+
+            {% if user.is_authenticated %}
+            <div class="item-footer">
+                {% if item.user == user %}
+                    <!-- User's own item -->
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'items:item_detail' item.id %}" class="btn btn-outline-info flex-fill">
+                            <i class="fas fa-eye me-1"></i>View Details
+                        </a>
+                        {% if item.status != 'returned' %}
+                        <a href="{% url 'items:edit_item' item.id %}" class="btn btn-outline-primary flex-fill">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </a>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <!-- Other user's item -->
+                    {% if item.status != 'claimed' and item.status != 'returned' %}
+                    <button class="btn btn-outline-primary claim-btn" data-item-id="{{ item.id }}" data-item-title="{{ item.title }}">
+                        <i class="fas fa-hand-holding-heart me-1"></i>Claim Item
+                    </button>
+                    {% elif item.status == 'claimed' %}
+                    <button class="btn btn-secondary" disabled>
+                        <i class="fas fa-check me-1"></i>Already Claimed
+                    </button>
+                    {% elif item.status == 'returned' %}
+                    <button class="btn btn-success" disabled>
+                        <i class="fas fa-check-circle me-1"></i>Returned
+                    </button>
+                    {% else %}
+                    <a href="{% url 'items:item_detail' item.id %}" class="btn btn-outline-info">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            {% if search_query or category_filter or status_filter or date_from or date_to or tags_filter %}🔍{% else %}📦{% endif %}
+        </div>
+        <h5>
+            {% if search_query or category_filter or status_filter or date_from or date_to or tags_filter %}
+                No items found
+            {% else %}
+                No items reported yet
+            {% endif %}
+        </h5>
+        <p>
+            {% if search_query or category_filter or status_filter or date_from or date_to or tags_filter %}
+                Try adjusting your search or browse all items.
+            {% else %}
+                Be the first to report a found item and help someone!
+            {% endif %}
+        </p>
+        {% if user.is_authenticated %}
+        <a href="{% url 'items:report_item' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Report Found Item
+        </a>
+        {% else %}
+        <a href="{% url 'accounts:signup' %}" class="btn btn-primary">
+            <i class="fas fa-user-plus me-1"></i>Sign Up to Get Started
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+
+<!-- Claim Item Modal -->
+<div class="modal fade" id="claimModal" tabindex="-1" aria-labelledby="claimModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="claimModalLabel">Claim Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="claimForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p class="text-muted mb-3">
+                        Claiming <strong id="modalItemTitle"></strong>
+                    </p>
+                    <div class="mb-3">
+                        <label for="claimMessage" class="form-label">Message (Optional)</label>
+                        <textarea class="form-control" id="claimMessage" name="message" rows="3" placeholder="Tell the owner how to recognize you or arrange pickup..."></textarea>
+                        <small class="text-muted">Your email will be shared with the owner once they accept your claim.</small>
+                    </div>
+                    <input type="hidden" id="itemIdInput" name="item_id" value="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="claimSubmitBtn">Submit Claim</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toast function - define first before other functions use it
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+    const typeClass = type === 'error' ? 'danger' : type;
+    const typeIcon = type === 'error' ? '✕' : type === 'success' ? '✓' : 'ℹ';
+    const typeTitle = type === 'error' ? 'Error' : type === 'success' ? 'Success' : 'Info';
+    
+    const toastHTML = `
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-${typeClass}">
+                <strong class="me-auto text-white">${typeIcon} ${typeTitle}</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+    const toastElement = toastContainer.lastElementChild;
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+    
+    toastElement.addEventListener('hidden.bs.toast', function() {
+        toastElement.remove();
+    });
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    container.style.zIndex = '11000';
+    document.body.appendChild(container);
+    return container;
+}
+
+function removeModalBackdrop() {
+    // Force remove all backdrop elements
+    document.querySelectorAll('.modal-backdrop').forEach(el => {
+        el.style.display = 'none';
+        el.style.opacity = '0';
+        el.style.pointerEvents = 'none';
+        el.remove();
+    });
+    
+    // Force remove modal-open class and styles
+    document.body.classList.remove('modal-open');
+    document.body.style.paddingRight = '';
+    document.body.style.overflow = '';
+    
+    // Additional cleanup - check for any lingering backdrop elements
+    setTimeout(() => {
+        document.querySelectorAll('[class*="modal-backdrop"]').forEach(el => {
+            el.style.display = 'none';
+            el.style.pointerEvents = 'none';
+            el.remove();
+        });
+    }, 50);
+    
+    // Force CSS refresh
+    document.body.style.transform = 'translateZ(0)';
+    requestAnimationFrame(() => {
+        document.body.style.transform = '';
+    });
+}
+
+function cleanupAllModals() {
+    document.querySelectorAll('.modal').forEach(modal => {
+        try {
+            const instance = bootstrap.Modal.getInstance(modal);
+            if (instance) {
+                instance.hide();
+            }
+        } catch (e) {}
+    });
+    removeModalBackdrop();
+}
+
+// Enhanced modal cleanup - run periodically
+function forceModalCleanup() {
+    if (!document.querySelector('.modal.show')) {
+        removeModalBackdrop();
+    }
+}
+
+// Filter form functionality
+document.getElementById('filterForm').addEventListener('change', function(e) {
+    const searchVal = this.querySelector('input[name="search"]').value;
+    const categoryVal = this.querySelector('select[name="category"]').value;
+    const clearBtn = document.getElementById('clearBtn');
+    
+    if (searchVal || categoryVal) {
+        clearBtn.style.display = 'block';
+    } else {
+        clearBtn.style.display = 'none';
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Clean up any existing backdrops on page load
+    removeModalBackdrop();
+    
+    // Monitor for modal state changes
+    setInterval(forceModalCleanup, 1000);
+    
+    // Enhanced event listeners for all modals
+    document.addEventListener('hidden.bs.modal', function() {
+        setTimeout(removeModalBackdrop, 100);
+    });
+    
+    document.addEventListener('hide.bs.modal', function() {
+        setTimeout(removeModalBackdrop, 50);
+    });
+    
+    // Handle ESC key globally
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            setTimeout(removeModalBackdrop, 100);
+        }
+    });
+
+    const claimModal = document.getElementById('claimModal');
+    
+    claimModal.addEventListener('hidden.bs.modal', function() {
+        removeModalBackdrop();
+    });
+    
+    document.querySelectorAll('.claim-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            removeModalBackdrop();
+            const itemId = this.dataset.itemId;
+            const itemTitle = this.dataset.itemTitle;
+            
+            document.getElementById('itemIdInput').value = itemId;
+            document.getElementById('modalItemTitle').textContent = itemTitle;
+            document.getElementById('claimMessage').value = '';
+            
+            const modal = new bootstrap.Modal(claimModal);
+            modal.show();
+        });
+    });
+
+    document.getElementById('claimForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const itemId = document.getElementById('itemIdInput').value;
+        const message = document.getElementById('claimMessage').value;
+        const submitBtn = document.getElementById('claimSubmitBtn');
+        
+        if (message.length > 1000) {
+            showToast('Message cannot exceed 1000 characters', 'error');
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+        
+        try {
+            const formData = new FormData();
+            formData.append('item_id', itemId);
+            formData.append('message', message);
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            
+            const response = await fetch('{% url "items:claim_item" %}', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to claim item');
+            }
+            
+            showToast('Item claimed successfully! The owner will be notified.', 'success');
+            removeModalBackdrop();
+            
+            try {
+                const instance = bootstrap.Modal.getInstance(claimModal);
+                if (instance) instance.hide();
+            } catch (e) {}
+
+            setTimeout(() => location.reload(), 1500);
+            
+        } catch (error) {
+            showToast('Error: ' + error.message, 'error');
+            removeModalBackdrop();
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Submit Claim';
+        }
+    });
+
+    const proximityBtn = document.getElementById('proximityBtn');
+    if (proximityBtn) {
+        proximityBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            if (!navigator.geolocation) {
+                showToast('Geolocation is not supported by your browser', 'error');
+                return;
+            }
+            
+            proximityBtn.disabled = true;
+            proximityBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Getting location...';
+            
+            try {
+                navigator.geolocation.getCurrentPosition(
+                    async function(position) {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        const radius = 5;
+                        
+                        try {
+                            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                            const response = await fetch('{% url "items:search_nearby_items" %}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': csrfToken,
+                                },
+                                body: JSON.stringify({
+                                    latitude: latitude,
+                                    longitude: longitude,
+                                    radius: radius
+                                })
+                            });
+                            
+                            const data = await response.json();
+                            
+                            if (!response.ok) {
+                                throw new Error(data.error || 'Search failed');
+                            }
+                            
+                            showToast(`Found ${data.count} items within ${radius}km`, 'success');
+                            
+                            if (data.items.length > 0) {
+                                window.location.hash = 'items-list';
+                            }
+                            
+                        } catch (error) {
+                            showToast('Error: ' + error.message, 'error');
+                        }
+                        
+                        proximityBtn.disabled = false;
+                        proximityBtn.innerHTML = '📍 Nearby';
+                    },
+                    function(error) {
+                        let errorMsg = 'Unable to get your location';
+                        if (error.code === error.PERMISSION_DENIED) {
+                            errorMsg = 'Location permission denied. Enable location services to use proximity search.';
+                        } else if (error.code === error.POSITION_UNAVAILABLE) {
+                            errorMsg = 'Your location is currently unavailable.';
+                        } else if (error.code === error.TIMEOUT) {
+                            errorMsg = 'The location request timed out.';
+                        }
+                        showToast(errorMsg, 'error');
+                        proximityBtn.disabled = false;
+                        proximityBtn.innerHTML = '📍 Nearby';
+                    },
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                proximityBtn.disabled = false;
+                proximityBtn.innerHTML = '📍 Nearby';
+            }
+        });
+    }
+});
+
+if (document.querySelector('[name=csrfmiddlewaretoken]')) {
+    const updateCheckInterval = setInterval(async function() {
+        try {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const response = await fetch('{% url "items:get_updates" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: ''
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data.new_claims > 0 && document.querySelector('.hero-title')) {
+                    const badge = document.querySelector('.unread-claims-badge');
+                    if (badge) {
+                        badge.textContent = data.new_claims;
+                        badge.style.display = 'inline-block';
+                    }
+                }
+                
+                if (data.new_notifications > 0) {
+                    const notifBadge = document.querySelector('.unread-notifications-badge');
+                    if (notifBadge) {
+                        notifBadge.textContent = data.new_notifications;
+                        notifBadge.style.display = 'inline-block';
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error checking for updates:', error);
+        }
+    }, 15000);
+}
+
+</script>
+
+{% endblock %}

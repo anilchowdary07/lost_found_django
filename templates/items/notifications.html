@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications - Campus Lost & Found{% endblock %}
+
+{% block content %}
+<!-- Hidden form for CSRF token -->
+<form style="display: none;">
+    {% csrf_token %}
+</form>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="mb-2">Notifications</h1>
+        <p class="text-muted">Track claims on your reported items</p>
+    </div>
+    {% if unread_count > 0 %}
+    <div class="col-md-4 text-end">
+        <span class="badge bg-danger">{{ unread_count }} unread</span>
+    </div>
+    {% endif %}
+</div>
+
+{% if notifications %}
+    <div class="row">
+        <div class="col-lg-8">
+            {% for notification in notifications %}
+            <div class="card mb-3 {% if not notification.is_read %}border-primary border-2{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h5 class="card-title">
+                                {% if not notification.is_read %}
+                                <span class="badge bg-primary me-2">New</span>
+                                {% endif %}
+                                {{ notification.claim.item.title }}
+                            </h5>
+                            
+                            <p class="card-text text-muted mb-3">
+                                {{ notification.message }}
+                            </p>
+                            
+                            <div class="mb-3">
+                                <strong class="text-dark">Claimer:</strong> 
+                                <span class="badge bg-light text-dark">{{ notification.claim.claimer.username }}</span>
+                            </div>
+                            
+                            {% if notification.claim.message %}
+                            <div class="alert alert-light mb-3" role="alert">
+                                <strong>Their Message:</strong>
+                                <br>{{ notification.claim.message }}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="d-flex gap-2 flex-wrap">
+                                {% if notification.claim.status == 'pending' %}
+                                <button class="btn btn-sm btn-success accept-claim-btn" data-claim-id="{{ notification.claim.id }}">
+                                    ✅ Accept Claim
+                                </button>
+                                <button class="btn btn-sm btn-danger reject-claim-btn" data-claim-id="{{ notification.claim.id }}">
+                                    ❌ Reject Claim
+                                </button>
+                                {% elif notification.claim.status == 'accepted' %}
+                                <div class="alert alert-success mb-0" role="alert">
+                                    <strong>✅ Claim Accepted</strong><br>
+                                    Contact the claimer to arrange pickup.
+                                </div>
+                                {% elif notification.claim.status == 'rejected' %}
+                                <div class="alert alert-warning mb-0" role="alert">
+                                    <strong>❌ Claim Rejected</strong><br>
+                                    You rejected this claim.
+                                </div>
+                                {% endif %}
+                                
+                                {% if not notification.contact_revealed and notification.claim.status == 'accepted' %}
+                                <button class="btn btn-sm btn-primary reveal-contact-btn" data-notification-id="{{ notification.id }}">
+                                    🔓 Reveal Contact
+                                </button>
+                                {% else %}
+                                <div class="alert alert-success mb-0" role="alert">
+                                    <strong>Contact Revealed:</strong>
+                                    <br>Email: <a href="mailto:{{ notification.claim.claimer.email }}">{{ notification.claim.claimer.email }}</a>
+                                    <br>Name: {{ notification.claim.claimer.first_name }} {{ notification.claim.claimer.last_name|default:notification.claim.claimer.username }}
+                                </div>
+                                {% endif %}
+                                
+                                {% if not notification.is_read %}
+                                <button class="btn btn-sm btn-outline-secondary mark-read-btn" data-notification-id="{{ notification.id }}">
+                                    Mark as Read
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <small class="text-muted text-end">
+                            {{ notification.created_at|date:"M d, Y H:i" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-info text-center py-5">
+        <h5>No Notifications</h5>
+        <p>Claims on your reported items will appear here.</p>
+        <a href="{% url 'items:dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+    </div>
+{% endif %}
+
+<script>
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+    const typeClass = type === 'error' ? 'danger' : type;
+    const typeIcon = type === 'error' ? '✕' : type === 'success' ? '✓' : 'ℹ';
+    const typeTitle = type === 'error' ? 'Error' : type === 'success' ? 'Success' : 'Info';
+    
+    const toastHTML = `
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-${typeClass}">
+                <strong class="me-auto text-white">${typeIcon} ${typeTitle}</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+    const toastElement = toastContainer.lastElementChild;
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+    
+    toastElement.addEventListener('hidden.bs.toast', function() {
+        toastElement.remove();
+    });
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    document.body.appendChild(container);
+    return container;
+}
+
+// Reveal contact functionality
+document.querySelectorAll('.reveal-contact-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const notificationId = this.dataset.notificationId;
+        const btn = this;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Loading...';
+        
+        try {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const response = await fetch(`/api/notifications/${notificationId}/reveal-contact/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to reveal contact');
+            }
+            
+            // Replace button with contact info
+            const contactDiv = document.createElement('div');
+            contactDiv.className = 'alert alert-success mb-0';
+            contactDiv.innerHTML = `
+                <strong>Contact Revealed:</strong>
+                <br>Email: <a href="mailto:${data.claimer_email}">${data.claimer_email}</a>
+                <br>Name: ${data.claimer_name}
+            `;
+            
+            btn.replaceWith(contactDiv);
+            showToast('Contact revealed successfully!', 'success');
+            
+        } catch (error) {
+            showToast('Error: ' + error.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = '🔓 Reveal Contact';
+        }
+    });
+});
+
+// Mark as read functionality
+document.querySelectorAll('.mark-read-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const notificationId = this.dataset.notificationId;
+        const btn = this;
+        
+        btn.disabled = true;
+        
+        try {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const response = await fetch(`/api/notifications/${notificationId}/mark-read/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to mark as read');
+            }
+            
+            // Remove the "New" badge and button
+            btn.closest('.card').classList.remove('border-primary', 'border-2');
+            const newBadge = btn.closest('.card-body').querySelector('.badge.bg-primary');
+            if (newBadge) {
+                newBadge.remove();
+            }
+            btn.remove();
+            showToast('Notification marked as read', 'success');
+            
+        } catch (error) {
+            showToast('Error: ' + error.message, 'error');
+            btn.disabled = false;
+        }
+    });
+});
+
+// Accept claim functionality
+document.querySelectorAll('.accept-claim-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const claimId = this.dataset.claimId;
+        const btn = this;
+        
+        if (!confirm('Are you sure you want to accept this claim? The claimer will be able to see your contact information.')) {
+            return;
+        }
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Accepting...';
+        
+        try {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const response = await fetch(`/api/claims/${claimId}/accept/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to accept claim');
+            }
+            
+            // Replace buttons with success message
+            const actionDiv = btn.closest('.d-flex');
+            const successDiv = document.createElement('div');
+            successDiv.className = 'alert alert-success mb-0';
+            successDiv.innerHTML = `
+                <strong>✅ Claim Accepted</strong><br>
+                Contact the claimer to arrange pickup.
+            `;
+            
+            actionDiv.replaceWith(successDiv);
+            showToast('Claim accepted successfully!', 'success');
+            
+        } catch (error) {
+            showToast('Error: ' + error.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = '✅ Accept Claim';
+        }
+    });
+});
+
+// Reject claim functionality
+document.querySelectorAll('.reject-claim-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const claimId = this.dataset.claimId;
+        const btn = this;
+        
+        if (!confirm('Are you sure you want to reject this claim? The item will become available for other claims.')) {
+            return;
+        }
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Rejecting...';
+        
+        try {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const response = await fetch(`/api/claims/${claimId}/reject/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to reject claim');
+            }
+            
+            // Replace buttons with rejection message
+            const actionDiv = btn.closest('.d-flex');
+            const rejectDiv = document.createElement('div');
+            rejectDiv.className = 'alert alert-warning mb-0';
+            rejectDiv.innerHTML = `
+                <strong>❌ Claim Rejected</strong><br>
+                You rejected this claim.
+            `;
+            
+            actionDiv.replaceWith(rejectDiv);
+            showToast('Claim rejected successfully!', 'success');
+            
+        } catch (error) {
+            showToast('Error: ' + error.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = '❌ Reject Claim';
+        }
+    });
+});
+</script>
+{% endblock %}

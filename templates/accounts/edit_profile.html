@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - Campus Lost & Found{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-photo-container {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .profile-photo-preview {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #e2e8f0;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    .photo-upload-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+    .photo-input {
+        display: none;
+    }
+    .photo-upload-btn {
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #3b82f6, #2563eb);
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .photo-upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+    .photo-upload-btn:active {
+        transform: translateY(0);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <h2 class="card-title mb-2">Edit Profile</h2>
+                    <p class="text-muted">Update your account information</p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="profile-photo-container">
+                        <img id="photoPreview" class="profile-photo-preview" 
+                             src="{% if user.profile.profile_photo %}{{ user.profile.profile_photo }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name|urlencode }}&background=3b82f6&color=ffffff&size=120{% endif %}"
+                             alt="Profile Photo">
+                        <div class="photo-upload-wrapper">
+                            <input type="file" id="profilePhotoInput" name="profile_photo" class="photo-input" accept="image/*">
+                            <label for="profilePhotoInput" class="photo-upload-btn">
+                                <span>📷</span> Upload Photo
+                            </label>
+                        </div>
+                        <small class="text-muted d-block">JPG, PNG, GIF or WebP (max 5MB)</small>
+                        {% if form.profile_photo.errors %}
+                            <div class="text-danger small mt-2">
+                                {% for error in form.profile_photo.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">Email Address</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.email.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.first_name.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.last_name.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const photoInput = document.getElementById('profilePhotoInput');
+    const photoPreview = document.getElementById('photoPreview');
+    
+    photoInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                photoPreview.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

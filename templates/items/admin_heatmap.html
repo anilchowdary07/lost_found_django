@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Location Heatmap - Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.css" />
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="mb-2">🗺️ Location Heatmap</h1>
+        <p class="text-muted">Analyze where items are most frequently lost on campus</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-9">
+        <div id="map"></div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="heatmap-legend">
+            <h6 class="mb-3">📊 Hotspot Zones</h6>
+            
+            {% if locations %}
+            <div class="scrollable">
+                {% for location in locations %}
+                <div class="card mb-2">
+                    <div class="card-body p-2">
+                        <h6 class="card-title mb-1">
+                            <span class="badge" style="background-color: hsl({{ forloop.counter0 }}, 80%, 50%);">{{ location.count }}</span>
+                            {{ location.location_name }}
+                        </h6>
+                        <small class="text-muted d-block">
+                            Items lost: <strong>{{ location.count }}</strong>
+                        </small>
+                        <small class="text-muted d-block">
+                            Lat: {{ location.latitude|floatformat:4 }}
+                        </small>
+                        <small class="text-muted d-block">
+                            Lng: {{ location.longitude|floatformat:4 }}
+                        </small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info mb-0">
+                <small>No location data yet</small>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">📈 Insights</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <div class="fs-3 text-primary">{{ locations|length }}</div>
+                        <small class="text-muted">Unique Locations</small>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        {% if locations %}
+                        <div class="fs-3 text-success">{{ locations|first.count }}</div>
+                        <small class="text-muted">Most Common Location</small>
+                        {% else %}
+                        <div class="fs-3 text-muted">-</div>
+                        <small class="text-muted">No data</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 text-center">
+                        {% if locations %}
+                        <div class="fs-3 text-warning">{{ locations|last.count }}</div>
+                        <small class="text-muted">Least Common Location</small>
+                        {% else %}
+                        <div class="fs-3 text-muted">-</div>
+                        <small class="text-muted">No data</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const heatmapData = {{ heatmap_data|safe }};
+    
+    const map = L.map('map').setView([13.0, 77.5], 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    if (heatmapData.length > 0) {
+        const heatPoints = heatmapData.map(point => [point.lat, point.lng, point.count]);
+        L.heatLayer(heatPoints, {
+            radius: 25,
+            blur: 15,
+            maxZoom: 17,
+            minOpacity: 0.5,
+            gradient: {0.2: '#0099ff', 0.4: '#00ff00', 0.6: '#ffff00', 0.8: '#ff9900', 1: '#ff0000'}
+        }).addTo(map);
+        
+        heatmapData.forEach(point => {
+            L.circleMarker([point.lat, point.lng], {
+                radius: Math.min(Math.sqrt(point.count) * 2, 15),
+                fillColor: '#ff7800',
+                color: '#000',
+                weight: 1,
+                opacity: 0.7,
+                fillOpacity: 0.6
+            }).bindPopup(
+                `<strong>${point.location}</strong><br/>Items lost: ${point.count}`
+            ).addTo(map);
+        });
+        
+        const bounds = L.latLngBounds(heatmapData.map(p => [p.lat, p.lng]));
+        map.fitBounds(bounds, { padding: [50, 50] });
+    } else {
+        const bounds = L.latLngBounds([[13.0, 77.5]]);
+        map.fitBounds(bounds);
+    }
+});
+</script>
+{% endblock %}

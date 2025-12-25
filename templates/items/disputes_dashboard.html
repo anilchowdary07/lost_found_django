@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}Disputes - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="mb-2">⚖️ Dispute Resolution</h1>
+        <p class="text-muted">Manage disputes between claimers and reporters</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="fs-3 text-warning">{{ stats.total_open }}</div>
+                <small class="text-muted">Open Disputes</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="fs-3 text-info">{{ stats.total_in_progress }}</div>
+                <small class="text-muted">In Progress</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="fs-3 text-success">{{ stats.total_resolved }}</div>
+                <small class="text-muted">Resolved</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">⏳ Open Disputes</h5>
+            </div>
+            <div class="card-body">
+                {% if open_disputes %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Item</th>
+                                <th>Reporter</th>
+                                <th>Claimer</th>
+                                <th>Reason</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dispute in open_disputes %}
+                            <tr>
+                                <td>
+                                    <strong>{{ dispute.claim.item.title|truncatewords:3 }}</strong>
+                                </td>
+                                <td>
+                                    <small>{{ dispute.reporter.username }}</small>
+                                </td>
+                                <td>
+                                    <small>{{ dispute.claimer.username }}</small>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ dispute.reason|truncatewords:8 }}</small>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ dispute.created_at|date:"M d, H:i" }}</small>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="openResolveModal({{ dispute.id }})">
+                                        Review & Resolve
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-success mb-0">
+                    ✓ No open disputes!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if in_progress_disputes or resolved_disputes %}
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">🔄 In Progress</h5>
+            </div>
+            <div class="card-body">
+                {% if in_progress_disputes %}
+                <div class="list-group">
+                    {% for dispute in in_progress_disputes %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <strong>{{ dispute.claim.item.title|truncatewords:3 }}</strong>
+                            <small class="text-muted">{{ dispute.created_at|date:"M d" }}</small>
+                        </div>
+                        <small class="d-block">{{ dispute.reporter.username }} vs {{ dispute.claimer.username }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <small class="text-muted">No in-progress disputes</small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">✓ Resolved</h5>
+            </div>
+            <div class="card-body">
+                {% if resolved_disputes %}
+                <div class="list-group">
+                    {% for dispute in resolved_disputes %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <strong>{{ dispute.claim.item.title|truncatewords:3 }}</strong>
+                            <small class="badge bg-{{ dispute.resolution|resolution_color }}">
+                                {{ dispute.get_resolution_display }}
+                            </small>
+                        </div>
+                        <small class="d-block text-muted">{{ dispute.resolved_at|date:"M d" }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <small class="text-muted">No resolved disputes</small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div id="resolveModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Resolve Dispute</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Resolution</label>
+                    <select id="resolutionSelect" class="form-select">
+                        <option value="">-- Select Resolution --</option>
+                        <option value="favor_claimer">✓ Favor Claimer</option>
+                        <option value="favor_reporter">✓ Favor Reporter</option>
+                        <option value="mutual_agreement">🤝 Mutual Agreement</option>
+                        <option value="no_resolution">❌ No Resolution</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Admin Notes</label>
+                    <textarea id="adminNotes" class="form-control" rows="4" placeholder="Explain your decision..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitResolution">Resolve</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentDisputeId = null;
+
+function openResolveModal(disputeId) {
+    currentDisputeId = disputeId;
+    document.getElementById('resolutionSelect').value = '';
+    document.getElementById('adminNotes').value = '';
+    const modal = new bootstrap.Modal(document.getElementById('resolveModal'));
+    modal.show();
+}
+
+document.getElementById('submitResolution').addEventListener('click', async function() {
+    const resolution = document.getElementById('resolutionSelect').value;
+    const adminNotes = document.getElementById('adminNotes').value;
+    
+    if (!resolution) {
+        showToast('Please select a resolution', 'error');
+        return;
+    }
+    
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    try {
+        const response = await fetch('{% url "items:resolve_dispute" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken,
+            },
+            body: `dispute_id=${currentDisputeId}&resolution=${resolution}&admin_notes=${encodeURIComponent(adminNotes)}`
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showToast('Dispute resolved successfully', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast('Error: ' + data.error, 'error');
+        }
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    }
+    
+    bootstrap.Modal.getInstance(document.getElementById('resolveModal')).hide();
+});
+
+function showToast(message, type) {
+    const toastHtml = `<div class="toast" role="alert">
+        <div class="toast-body bg-${type === 'error' ? 'danger' : 'success'} text-white">
+            ${message}
+        </div>
+    </div>`;
+    
+    const container = document.querySelector('.toast-container') || document.createElement('div');
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    container.innerHTML = toastHtml;
+    document.body.appendChild(container);
+    
+    const toast = new bootstrap.Toast(container.querySelector('.toast'));
+    toast.show();
+}
+</script>
+{% endblock %}
