@@ -43,9 +43,6 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
-if not DEBUG:
-    INSTALLED_APPS.insert(6, 'django_ratelimit')
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -177,20 +174,11 @@ SECURE_CONTENT_SECURITY_POLICY = {
     'font-src': ("'self'", "cdn.jsdelivr.net", "data:"),
 }
 
-RATELIMIT_USE_CACHE = 'default'
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
 
-if DEBUG:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        }
-    }
-    RATELIMIT_ENABLE = False
-else:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'unique-snowflake',
-        }
-    }
-    RATELIMIT_ENABLE = True
+RATELIMIT_USE_CACHE = 'default'
+RATELIMIT_ENABLE = False
