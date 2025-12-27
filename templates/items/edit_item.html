@@ -4,28 +4,134 @@
 
 {% block extra_css %}
 <style>
-    .form-check-input {
+    .modern-form-card {
+        background: #fff;
+        border-radius: 22px;
+        box-shadow: 0 8px 32px rgba(2,6,23,0.10);
+        border: 1.5px solid #e0e7ef;
+        padding: 2.5rem 2.5rem 2rem 2.5rem;
+        margin-bottom: 2.5rem;
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .modern-form-card:hover {
+        box-shadow: 0 12px 36px rgba(99,102,241,0.13), 0 2px 8px rgba(2,6,23,0.10);
+        transform: translateY(-2px) scale(1.01);
+    }
+    .modern-form-floating {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    .modern-form-floating input,
+    .modern-form-floating textarea,
+    .modern-form-floating select {
+        border-radius: 12px;
+        border: 1.5px solid #e0e7ef;
+        padding: 1.1rem 1.1rem 0.6rem 1.1rem;
+        font-size: 1.08rem;
+        background: #f8fafc;
+        transition: border 0.2s, box-shadow 0.2s;
+        width: 100%;
+        outline: none;
+    }
+    .modern-form-floating label {
+        position: absolute;
+        top: 1.1rem;
+        left: 1.1rem;
+        color: #64748b;
+        font-size: 1rem;
+        pointer-events: none;
+        transition: 0.2s;
+        background: transparent;
+    }
+    .modern-form-floating input:focus + label,
+    .modern-form-floating input:not(:placeholder-shown) + label,
+    .modern-form-floating textarea:focus + label,
+    .modern-form-floating textarea:not(:placeholder-shown) + label,
+    .modern-form-floating select:focus + label,
+    .modern-form-floating select:not([value=""]) + label {
+        top: -0.7rem;
+        left: 0.9rem;
+        font-size: 0.92rem;
+        color: #6366f1;
+        background: #fff;
+        padding: 0 0.3rem;
+    }
+    .modern-form-floating .invalid-feedback {
+        color: #ef4444;
+        font-size: 0.95rem;
+        margin-top: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .modern-form-floating .invalid-feedback:before {
+        content: '⛔';
+        font-size: 1.1rem;
+    }
+    .modern-form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+    .modern-form-actions .btn {
+        min-width: 140px;
+        font-size: 1.08rem;
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 0.7rem 1.5rem;
+    }
+    .modern-form-actions .btn-primary {
+        background: linear-gradient(90deg, #6366f1, #818cf8);
+        border: none;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(99,102,241,0.10);
+        transition: background 0.2s;
+    }
+    .modern-form-actions .btn-primary:hover {
+        background: linear-gradient(90deg, #818cf8, #6366f1);
+        color: #fff;
+    }
+    .modern-form-actions .btn-secondary {
+        background: #f1f5fa;
+        color: #334155;
+        border: none;
+    }
+    .modern-form-actions .btn-secondary:hover {
+        background: #e0e7ef;
+        color: #1e293b;
+    }
+    .drag-drop-area {
+        border: 2px dashed #a5b4fc;
+        border-radius: 12px;
+        background: #f8fafc;
+        padding: 2rem 1rem;
+        text-align: center;
+        color: #6366f1;
+        font-size: 1.1rem;
+        margin-bottom: 1.2rem;
+        transition: border 0.2s, background 0.2s;
         cursor: pointer;
     }
-    .form-check {
-        padding: 1rem;
+    .drag-drop-area.dragover {
+        border-color: #6366f1;
+        background: #e0e7ff;
+    }
+    .img-preview, .current-image {
+        max-width: 100%;
+        max-height: 300px;
         border-radius: 8px;
         border: 2px solid #e2e8f0;
-        transition: all 0.3s ease;
+        margin-top: 1rem;
     }
-    .form-check:has(.form-check-input:checked) {
-        border-color: #3b82f6;
-        background: #f0f9ff;
-    }
-    .form-check-label {
-        cursor: pointer;
-        margin-bottom: 0;
-        user-select: none;
-    }
-    .current-image {
-        max-width: 300px;
-        border-radius: 8px;
-        border: 2px solid #e2e8f0;
+    @media (max-width: 768px) {
+        .modern-form-card {
+            padding: 1.2rem 0.7rem;
+        }
+        .modern-form-actions {
+            flex-direction: column;
+            gap: 0.7rem;
+        }
     }
 </style>
 {% endblock %}
@@ -33,159 +139,142 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card shadow-sm">
-            <div class="card-body p-5">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h2 class="card-title mb-1">Edit Item</h2>
-                        <p class="text-muted mb-0">Update your item details</p>
-                    </div>
-                    <a href="{% url 'items:item_detail' item.id %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-1"></i>Back to Item
-                    </a>
+        <div class="modern-form-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="card-title mb-1">Edit Item</h2>
+                    <p class="text-muted mb-0">Update your item details</p>
                 </div>
-
-                <form method="post" enctype="multipart/form-data" id="editForm">
-                    {% csrf_token %}
-
-                    <!-- Current Image -->
-                    {% if item.image_url %}
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Current Image</label>
-                        <div class="text-center mb-3">
-                            <img src="{{ item.image_url }}" alt="{{ item.title }}" class="current-image">
-                        </div>
-                        <small class="text-muted">Upload a new image below to replace the current one</small>
-                    </div>
-                    {% endif %}
-
-                    <!-- Item Type Selection -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">What type of item are you reporting?</label>
-                        {{ form.item_type }}
-                        {% if form.item_type.errors %}
-                            <div class="text-danger small mt-2">
-                                {% for error in form.item_type.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- New Image Upload (Optional) -->
-                    <div class="mb-4">
-                        <label for="imageInput" class="form-label fw-bold">Update Image (Optional)</label>
-                        <div class="input-group">
-                            {{ form.image }}
-                        </div>
-                        {% if form.image.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.image.errors.0 }}
-                            </div>
-                        {% endif %}
-                        <small class="form-text text-muted d-block mt-2">
-                            Supported: JPG, PNG, GIF, WebP (max 5MB). Leave empty to keep current image.
-                        </small>
-
-                        <!-- Image Preview -->
-                        <div id="imagePreview" class="mt-3 hidden">
-                            <img id="previewImg" src="" alt="Preview" style="max-width: 300px; border-radius: 8px; border: 2px solid #e2e8f0;">
-                        </div>
-                    </div>
-
-                    <!-- Basic Information -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">Item Title</label>
-                            {{ form.title }}
-                            {% if form.title.errors %}
-                                <div class="text-danger small mt-1">
-                                    {% for error in form.title.errors %}{{ error }}{% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6">
-                            <label for="{{ form.category.id_for_label }}" class="form-label fw-bold">Category</label>
-                            {{ form.category }}
-                            {% if form.category.errors %}
-                                <div class="text-danger small mt-1">
-                                    {% for error in form.category.errors %}{{ error }}{% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="{{ form.location.id_for_label }}" class="form-label fw-bold">Location Found/Lost</label>
-                        {{ form.location }}
-                        {% if form.location.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form.location.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">Description</label>
-                        {{ form.description }}
-                        {% if form.description.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form.description.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Manual Tags -->
-                    <div class="mb-4">
-                        <label for="{{ form.manual_tags.id_for_label }}" class="form-label fw-bold">Additional Tags</label>
-                        {{ form.manual_tags }}
-                        {% if form.manual_tags.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form.manual_tags.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                        <small class="form-text text-muted d-block mt-2">
-                            Current tags: {% if item.ai_tags %}{{ item.ai_tags|join:", " }}{% else %}None{% endif %}
-                        </small>
-                    </div>
-
-                    <!-- Form Actions -->
-                    <div class="d-flex gap-3 justify-content-end">
-                        <a href="{% url 'items:item_detail' item.id %}" class="btn btn-outline-secondary">
-                            Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i>Save Changes
-                        </button>
-                    </div>
-                </form>
+                <a href="{% url 'items:item_detail' item.id %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Item
+                </a>
             </div>
+            <form method="post" enctype="multipart/form-data" id="editForm" autocomplete="off">
+                {% csrf_token %}
+                <!-- Current Image -->
+                {% if item.image_url %}
+                <div class="text-center mb-3">
+                    <img src="{{ item.image_url }}" alt="{{ item.title }}" class="current-image">
+                    <small class="text-muted d-block mt-2">Upload a new image below to replace the current one</small>
+                </div>
+                {% endif %}
+                <!-- Item Type Selection -->
+                <div class="modern-form-floating">
+                    {{ form.item_type }}
+                    {% if form.item_type.errors %}
+                        <div class="invalid-feedback d-block">{% for error in form.item_type.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+                <!-- Drag & Drop Image Upload -->
+                <div class="modern-form-floating">
+                    <div id="dragDropArea" class="drag-drop-area">
+                        <span id="dragDropText">Drag & drop an image here, or click to select</span>
+                        {{ form.image }}
+                    </div>
+                    {% if form.image.errors %}
+                        <div class="invalid-feedback d-block">{{ form.image.errors.0 }}</div>
+                    {% endif %}
+                    <small class="form-text text-muted d-block mt-2">
+                        Supported: JPG, PNG, GIF, WebP (max 5MB). Leave empty to keep current image.
+                    </small>
+                    <div id="imagePreview" class="mt-3" style="display:none;">
+                        <img id="previewImg" src="" alt="Preview" class="img-preview">
+                    </div>
+                </div>
+                <!-- Title -->
+                <div class="modern-form-floating">
+                    <input type="text" name="title" id="id_title" class="form-control" value="{{ form.title.value|default_if_none:'' }}" placeholder=" " required>
+                    <label for="id_title">Item Title</label>
+                    {% if form.title.errors %}
+                        <div class="invalid-feedback d-block">{% for error in form.title.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+                <!-- Category -->
+                <div class="modern-form-floating">
+                    {{ form.category }}
+                    <label for="id_category">Category</label>
+                    {% if form.category.errors %}
+                        <div class="invalid-feedback d-block">{% for error in form.category.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+                <!-- Location -->
+                <div class="modern-form-floating">
+                    <input type="text" name="location" id="id_location" class="form-control" value="{{ form.location.value|default_if_none:'' }}" placeholder=" " required>
+                    <label for="id_location">Location Found/Lost</label>
+                    {% if form.location.errors %}
+                        <div class="invalid-feedback d-block">{% for error in form.location.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+                <!-- Description -->
+                <div class="modern-form-floating">
+                    <textarea name="description" id="id_description" class="form-control" placeholder=" ">{{ form.description.value|default_if_none:'' }}</textarea>
+                    <label for="id_description">Description</label>
+                    {% if form.description.errors %}
+                        <div class="invalid-feedback d-block">{% for error in form.description.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+                <!-- Manual Tags -->
+                <div class="modern-form-floating">
+                    <input type="text" name="manual_tags" id="id_manual_tags" class="form-control" value="{{ form.manual_tags.value|default_if_none:'' }}" placeholder=" ">
+                    <label for="id_manual_tags">Additional Tags</label>
+                    {% if form.manual_tags.errors %}
+                        <div class="invalid-feedback d-block">{% for error in form.manual_tags.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                    <small class="form-text text-muted d-block mt-2">
+                        Current tags: {% if item.ai_tags %}{{ item.ai_tags|join:", " }}{% else %}None{% endif %}
+                    </small>
+                </div>
+                <div class="modern-form-actions">
+                    <a href="{% url 'items:item_detail' item.id %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Save Changes</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const imageInput = document.getElementById('id_image');
-    const imagePreview = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
 
-    if (imageInput) {
-        imageInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    imagePreview.classList.remove('hidden');
-                    imagePreview.style.display = 'block';
-                }
-                reader.readAsDataURL(file);
-            } else {
-                imagePreview.classList.add('hidden');
-                imagePreview.style.display = 'none';
-            }
-        });
-    }
-});
+// Drag & Drop Image Upload
+const dragDropArea = document.getElementById('dragDropArea');
+const imageInput = document.getElementById('id_image');
+const previewImg = document.getElementById('previewImg');
+const imagePreview = document.getElementById('imagePreview');
+const dragDropText = document.getElementById('dragDropText');
+
+if (dragDropArea && imageInput) {
+    dragDropArea.addEventListener('click', () => imageInput.click());
+    dragDropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dragDropArea.classList.add('dragover');
+    });
+    dragDropArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dragDropArea.classList.remove('dragover');
+    });
+    dragDropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragDropArea.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            imageInput.files = e.dataTransfer.files;
+            showImagePreview(e.dataTransfer.files[0]);
+        }
+    });
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            showImagePreview(e.target.files[0]);
+        }
+    });
+}
+
+function showImagePreview(file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        previewImg.src = event.target.result;
+        imagePreview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
 </script>
 
 {% endblock %}

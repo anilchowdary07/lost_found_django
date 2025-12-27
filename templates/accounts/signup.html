@@ -2,77 +2,241 @@
 
 {% block title %}Sign Up - Campus Lost & Found{% endblock %}
 
+{% block extra_css %}
+<style>
+    .signup-container {
+        min-height: 90vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        perspective: 1000px;
+        padding: 40px 0;
+    }
+    
+    .signup-card-wrapper {
+        display: flex;
+        background: var(--surface);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        width: 100%;
+        max-width: 1100px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.1s ease-out;
+        transform-style: preserve-3d;
+    }
+
+    .signup-visual {
+        flex: 1;
+        background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        padding: 40px;
+        color: white;
+    }
+
+    .visual-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        transform: translateZ(50px);
+    }
+
+    .floating-icon {
+        font-size: 8rem;
+        margin-bottom: 20px;
+        filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3));
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(-5deg); }
+    }
+
+    .visual-bg-circles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    .circle {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        backdrop-filter: blur(5px);
+    }
+
+    .signup-form-side {
+        flex: 1.2;
+        padding: 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        padding: 10px 15px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+        border-color: #0ea5e9;
+    }
+
+    .btn-signup {
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        background: linear-gradient(90deg, #0ea5e9 0%, #2563eb 100%);
+        border: none;
+        transition: all 0.3s;
+    }
+
+    .btn-signup:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+    }
+
+    @media (max-width: 991px) {
+        .signup-visual {
+            display: none;
+        }
+        .signup-card-wrapper {
+            max-width: 500px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-body p-5">
-                <h2 class="card-title text-center mb-4">Create Account</h2>
+<div class="signup-container">
+    <div class="signup-card-wrapper animate__animated animate__zoomIn" id="parallaxCard">
+        <!-- Visual Side -->
+        <div class="signup-visual">
+            <div class="visual-bg-circles">
+                <div class="circle" style="width: 250px; height: 250px; top: -100px; right: -50px;"></div>
+                <div class="circle" style="width: 180px; height: 180px; bottom: -50px; left: -50px;"></div>
+                <div class="circle" style="width: 120px; height: 120px; top: 20%; left: 10%;"></div>
+            </div>
+            <div class="visual-content">
+                <div class="floating-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h3>Join the Community</h3>
+                <p class="opacity-75">Help others and get rewarded with karma points.</p>
+            </div>
+        </div>
 
-                <form method="post" novalidate>
-                    {% csrf_token %}
+        <!-- Form Side -->
+        <div class="signup-form-side">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Create Account</h2>
+                <p class="text-muted">Start your journey with Campus Lost & Found</p>
+            </div>
 
-                    <div class="mb-3">
-                        <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold">Username</label>
                         {{ form.username }}
                         {% if form.username.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.username.errors.0 }}
-                            </div>
+                            <div class="invalid-feedback d-block">{{ form.username.errors.0 }}</div>
                         {% endif %}
                     </div>
-
-                    <div class="mb-3">
-                        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">Email</label>
                         {{ form.email }}
                         {% if form.email.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.email.errors.0 }}
-                            </div>
+                            <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
                         {% endif %}
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name (Optional)</label>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold">First Name</label>
                         {{ form.first_name }}
                     </div>
-
-                    <div class="mb-3">
-                        <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name (Optional)</label>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold">Last Name</label>
                         {{ form.last_name }}
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
-                        {{ form.password1 }}
-                        {% if form.password1.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.password1.errors.0 }}
-                            </div>
-                        {% endif %}
-                        <small class="form-text text-muted d-block mt-2">
-                            Password must be at least 8 characters long.
-                        </small>
-                    </div>
+                <div class="mb-3">
+                    <label for="{{ form.password1.id_for_label }}" class="form-label fw-semibold">Password</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <div class="invalid-feedback d-block">{{ form.password1.errors.0 }}</div>
+                    {% endif %}
+                    <small class="text-muted">At least 8 characters long.</small>
+                </div>
 
-                    <div class="mb-4">
-                        <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password</label>
-                        {{ form.password2 }}
-                        {% if form.password2.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.password2.errors.0 }}
-                            </div>
-                        {% endif %}
-                    </div>
+                <div class="mb-4">
+                    <label for="{{ form.password2.id_for_label }}" class="form-label fw-semibold">Confirm Password</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <div class="invalid-feedback d-block">{{ form.password2.errors.0 }}</div>
+                    {% endif %}
+                </div>
 
-                    <button type="submit" class="btn btn-primary w-100 mb-3">Sign Up</button>
-                </form>
+                <button type="submit" class="btn btn-primary btn-signup w-100 mb-4 text-white">
+                    Get Started <i class="fas fa-rocket ms-2"></i>
+                </button>
+            </form>
 
-                <p class="text-center text-muted">
-                    Already have an account? <a href="{% url 'accounts:login' %}">Log in here</a>
-                </p>
-            </div>
+            <p class="text-center text-muted mb-0">
+                Already have an account? <a href="{% url 'accounts:login' %}" class="text-decoration-none fw-bold text-primary">Log in here</a>
+            </p>
         </div>
     </div>
 </div>
+
+<script>
+    const card = document.getElementById('parallaxCard');
+    const container = document.querySelector('.signup-container');
+    const floatingIcon = document.querySelector('.floating-icon');
+
+    container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const xAxis = (rect.width / 2 - x) / 30;
+        const yAxis = (rect.height / 2 - y) / 30;
+        
+        card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        
+        if (floatingIcon) {
+            floatingIcon.style.transform = `translateZ(100px) rotateY(${xAxis * 1.2}deg) rotateX(${yAxis * 1.2}deg)`;
+        }
+    });
+
+    container.addEventListener('mouseenter', () => {
+        card.style.transition = 'none';
+    });
+
+    container.addEventListener('mouseleave', () => {
+        card.style.transition = 'transform 0.5s ease';
+        card.style.transform = 'rotateY(0deg) rotateX(0deg)';
+        if (floatingIcon) {
+            floatingIcon.style.transform = 'translateZ(0px) rotate(0deg)';
+        }
+    });
+</script>
 {% endblock %}

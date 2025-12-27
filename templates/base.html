@@ -7,99 +7,278 @@
     <title>{% block title %}Campus Lost & Found{% endblock %}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/site.css' %}">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23007bff' width='100' height='100'/><text x='50' y='65' font-size='60' font-weight='bold' fill='white' text-anchor='middle'>L&F</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23007bff' width='180' height='180' rx='40'/><text x='90' y='120' font-size='80' font-weight='bold' fill='white' text-anchor='middle'>L&F</text></svg>">
     {% block extra_css %}{% endblock %}
+    <style>
+        .footer {
+            background: linear-gradient(90deg, #f8fafc 60%, #e0e7ff 100%);
+            border-top: 1.5px solid #e0e7ff;
+            color: #64748b;
+            font-size: 1.05rem;
+            margin-top: 3rem;
+            box-shadow: 0 -2px 24px #6366f111;
+            transition: background 0.3s, color 0.3s;
+        }
+        [data-bs-theme="dark"] .footer {
+            background: linear-gradient(90deg, #232946 60%, #181b2a 100%);
+            border-top: 1.5px solid #232946;
+            color: #a5b4fc;
+            box-shadow: 0 -2px 24px #23294644;
+        }
+        .footer .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .footer .footer-social {
+            margin-bottom: 0.2rem;
+        }
+        .footer .footer-social a {
+            color: #6366f1;
+            margin: 0 0.4rem;
+            font-size: 1.3rem;
+            transition: color 0.2s;
+        }
+        .footer .footer-social a:hover {
+            color: #3b82f6;
+        }
+        [data-bs-theme="dark"] .footer .footer-social a {
+            color: #a5b4fc;
+        }
+        [data-bs-theme="dark"] .footer .footer-social a:hover {
+            color: #f59e42;
+        }
+        .footer .footer-brand {
+            font-weight: 700;
+            color: #6366f1;
+            font-size: 1.1rem;
+            letter-spacing: 0.04em;
+        }
+        [data-bs-theme="dark"] .footer .footer-brand {
+            color: #a5b4fc;
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'items:dashboard' %}">
-                <span class="brand-mark me-2" aria-hidden="true">
-                    <i class="fas fa-search"></i>
-                </span>
-                <span class="brand-text">Lost &amp; Found</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-lg-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'items:dashboard' %}">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'items:found_items_gallery' %}">Found</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'items:lost_items_gallery' %}">Lost</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'items:leaderboard' %}">Leaderboard</a>
-                    </li>
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link btn btn-primary" href="{% url 'items:report_item' %}">
-                                <i class="fas fa-plus me-1"></i>Report
-                            </a>
-                        </li>
-                        <li class="nav-item d-none d-lg-block">
-                            <a class="nav-link" href="{% url 'items:notifications' %}">
-                                <i class="fas fa-bell me-1"></i>Notifications
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <button id="themeToggle" class="nav-link" title="Toggle theme">
-                                <i class="fas fa-moon"></i>
-                            </button>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user me-1"></i>{{ user.username }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
-                                    <i class="fas fa-user-circle me-2"></i>Profile
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                </a></li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <button id="themeToggle" class="nav-link" title="Toggle theme">
-                                <i class="fas fa-moon"></i>
-                            </button>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:login' %}">
-                                <i class="fas fa-sign-in-alt me-1"></i>Login
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link btn btn-primary" href="{% url 'accounts:signup' %}">
-                                <i class="fas fa-user-plus me-1"></i>Sign up
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
+        <!-- Modernized Navbar: gradient, border, padding, rounded, hover, prominent brand -->
+        <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm modern-navbar" style="z-index:1040;">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center fs-4 fw-bold" href="{% url 'items:dashboard' %}" style="letter-spacing:0.03em;">
+                    <span class="brand-mark me-2" aria-hidden="true" style="font-size:2rem;"><i class="fas fa-search"></i></span>
+                    <span class="brand-text" style="font-weight:800;">Lost &amp; Found</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                        <li class="nav-item"><a class="nav-link nav-link-modern" href="{% url 'items:dashboard' %}">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-modern" href="{% url 'items:found_items_gallery' %}">Found</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-modern" href="{% url 'items:lost_items_gallery' %}">Lost</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-modern" href="{% url 'items:leaderboard' %}">Leaderboard</a></li>
+                        {% if user.is_authenticated %}
+                            <li class="nav-item">
+                                <a class="nav-link btn btn-light text-primary fw-semibold px-3 ms-lg-2" href="{% url 'items:report_item' %}"><i class="fas fa-plus me-1"></i>Report</a>
+                            </li>
+                            <li class="nav-item d-none d-lg-block">
+                                <a class="nav-link nav-link-modern position-relative" href="{% url 'items:notifications' %}"><i class="fas fa-bell me-1"></i>Notifications</a>
+                            </li>
+                            <li class="nav-item">
+                                <button id="themeToggle" class="nav-link btn btn-link p-0 ms-lg-2 nav-link-modern" title="Toggle theme" style="color:inherit;"><i class="fas fa-moon"></i></button>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle nav-link-modern" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user me-1"></i>{{ user.username }}
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user-circle me-2"></i>Profile</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'accounts:edit_profile' %}"><i class="fas fa-edit me-2"></i>Edit Profile</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <button id="themeToggle" class="nav-link btn btn-link p-0 ms-lg-2 nav-link-modern" title="Toggle theme" style="color:inherit;"><i class="fas fa-moon"></i></button>
+                            </li>
+                            <li class="nav-item"><a class="btn btn-light text-primary fw-semibold px-3 ms-lg-2" href="{% url 'accounts:login' %}">Login</a></li>
+                            <li class="nav-item"><a class="btn btn-light text-primary fw-semibold px-3 ms-lg-2" href="{% url 'accounts:signup' %}">Sign up</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
+        <style>
+        .modern-navbar {
+            background: linear-gradient(90deg, #6366f1 0%, #3b82f6 100%);
+            border-bottom: 2px solid #e0e7ff;
+            border-radius: 0 0 1.2rem 1.2rem;
+            padding-top: 0.4rem;
+            padding-bottom: 0.4rem;
+            box-shadow: 0 4px 24px 0 #6366f133;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .modern-navbar .navbar-brand {
+            color: #fff !important;
+            text-shadow: 0 2px 8px #6366f1cc;
+        }
+        .modern-navbar .nav-link-modern {
+            color: #e0e7ff !important;
+            font-weight: 500;
+            border-radius: 0.7rem;
+            padding: 0.5rem 1.1rem;
+            transition: background 0.18s, color 0.18s;
+        }
+        .modern-navbar .nav-link-modern:hover, .modern-navbar .nav-link-modern.active {
+            background: #fff;
+            color: #6366f1 !important;
+            text-decoration: none;
+        }
+        .modern-navbar .dropdown-menu {
+            border-radius: 0.7rem;
+            box-shadow: 0 4px 24px 0 #6366f122;
+            background: #fff;
+            transition: background 0.3s;
+        }
+        .modern-navbar .dropdown-item:active {
+            background: #6366f1;
+            color: #fff;
+        }
+        /* Toasts Modernization */
+        .toast-container {
+            z-index: 20000;
+        }
+        .toast {
+            border-radius: 1rem;
+            box-shadow: 0 4px 24px 0 #6366f144;
+            border: none;
+            overflow: hidden;
+            animation: toastIn 0.5s cubic-bezier(.4,2,.6,1) both;
+        }
+        @keyframes toastIn {
+            0% { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            100% { opacity: 1; transform: none; }
+        }
+        .toast-header {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            background: #6366f1;
+            color: #fff;
+        }
+        .toast-header.bg-success { background: #22c55e !important; }
+        .toast-header.bg-error, .toast-header.bg-danger { background: #ef4444 !important; }
+        .toast-header.bg-warning { background: #f59e42 !important; }
+        .toast-header.bg-info { background: #3b82f6 !important; }
+        .toast-body {
+            font-size: 1.05rem;
+            color: #222;
+            background: #f8fafc;
+        }
+        .toast .btn-close {
+            filter: invert(1) grayscale(1) brightness(2);
+        }
+        /* Dark mode improvements */
+        [data-bs-theme="dark"] .modern-navbar {
+            background: linear-gradient(90deg, #181b2a 0%, #232946 100%);
+            border-bottom: 2px solid #232946;
+        }
+        [data-bs-theme="dark"] .modern-navbar .navbar-brand {
+            color: #fff !important;
+            text-shadow: 0 2px 8px #232946cc;
+        }
+        [data-bs-theme="dark"] .modern-navbar .nav-link-modern {
+            color: #c7d2fe !important;
+        }
+        [data-bs-theme="dark"] .modern-navbar .nav-link-modern:hover, [data-bs-theme="dark"] .modern-navbar .nav-link-modern.active {
+            background: #fff2;
+            color: #6366f1 !important;
+        }
+        [data-bs-theme="dark"] .modern-navbar .dropdown-menu {
+            background: #232946;
+            color: #c7d2fe;
+        }
+        [data-bs-theme="dark"] .modern-navbar .dropdown-item:active {
+            background: #6366f1;
+            color: #fff;
+        }
+        [data-bs-theme="dark"] .toast-header {
+            background: #232946 !important;
+            color: #c7d2fe !important;
+        }
+        [data-bs-theme="dark"] .toast-header.bg-success { background: #22c55e !important; color: #fff !important; }
+        [data-bs-theme="dark"] .toast-header.bg-error, [data-bs-theme="dark"] .toast-header.bg-danger { background: #ef4444 !important; color: #fff !important; }
+        [data-bs-theme="dark"] .toast-header.bg-warning { background: #f59e42 !important; color: #fff !important; }
+        [data-bs-theme="dark"] .toast-header.bg-info { background: #3b82f6 !important; color: #fff !important; }
+        [data-bs-theme="dark"] .toast-body {
+            background: #181b2a;
+            color: #c7d2fe;
+        }
+        </style>
 
-    <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
+        <!-- Global Spinner Overlay -->
+        <div id="globalSpinner" style="display:none;position:fixed;z-index:20000;top:0;left:0;width:100vw;height:100vh;background:rgba(255,255,255,0.7);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
+                <div class="spinner-outer">
+                        <div class="spinner-inner"></div>
+                        <div class="spinner-text">Loading...</div>
+                </div>
+        </div>
+        <style>
+            #globalSpinner { display: flex; }
+            .spinner-outer {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            .spinner-inner {
+                width: 64px;
+                height: 64px;
+                border: 8px solid #e0e7ff;
+                border-top: 8px solid #6366f1;
+                border-radius: 50%;
+                animation: spin 1s linear infinite, pulse 1.5s infinite alternate;
+                margin-bottom: 16px;
+                box-shadow: 0 0 32px #6366f1aa;
+            }
+            .spinner-text {
+                font-weight: 700;
+                color: #6366f1;
+                font-size: 1.2rem;
+                letter-spacing: 0.05em;
+                text-shadow: 0 2px 8px #fff;
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            @keyframes pulse {
+                0% { box-shadow: 0 0 32px #6366f1aa; }
+                100% { box-shadow: 0 0 64px #6366f1cc; }
+            }
+        </style>
+        <!-- Navbar markup is now only in one place above -->
+
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer" style="min-width:320px;max-width:420px;"></div>
 
     <div class="container main-container">
         {% block content %}{% endblock %}
     </div>
 
     <footer class="footer">
-        <div class="container text-center py-4">
-            <p class="mb-0 muted">&copy; 2025 Campus Lost &amp; Found — Built for campus communities.</p>
+        <div class="container py-4 footer-content">
+            <div class="footer-social mb-2">
+                <a href="https://github.com/" target="_blank" rel="noopener" title="GitHub"><i class="fab fa-github"></i></a>
+                <a href="mailto:support@campuslf.com" title="Email"><i class="fas fa-envelope"></i></a>
+                <a href="https://twitter.com/" target="_blank" rel="noopener" title="Twitter"><i class="fab fa-twitter"></i></a>
+            </div>
+            <div class="footer-brand">Campus Lost &amp; Found</div>
+            <div class="footer-copy">&copy; 2025 — Built for campus communities.</div>
         </div>
     </footer>
 
@@ -122,30 +301,29 @@
         // Run cleanup on page load and periodically
         document.addEventListener('DOMContentLoaded', function() {
             globalModalCleanup();
-            
             // Clean up every 2 seconds if no modals are open
             setInterval(() => {
                 if (!document.querySelector('.modal.show')) {
                     globalModalCleanup();
                 }
             }, 2000);
-            
+
+            // Modern Toasts
             const toastContainer = document.getElementById('toastContainer');
-            
             {% if messages %}
                 {% for message in messages %}
                     const toastHTML = `
-                        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4200">
                             <div class="toast-header bg-{{ message.tags|default:'info' }}">
-                                <strong class="me-auto text-white">
+                                <strong class="me-auto">
                                     {% if message.tags == 'success' %}
-                                        ✓ Success
+                                        <i class="fa-solid fa-circle-check me-1"></i>Success
                                     {% elif message.tags == 'error' %}
-                                        ✕ Error
+                                        <i class="fa-solid fa-circle-xmark me-1"></i>Error
                                     {% elif message.tags == 'warning' %}
-                                        ⚠ Warning
+                                        <i class="fa-solid fa-triangle-exclamation me-1"></i>Warning
                                     {% else %}
-                                        ℹ Info
+                                        <i class="fa-solid fa-circle-info me-1"></i>Info
                                     {% endif %}
                                 </strong>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
@@ -155,36 +333,37 @@
                             </div>
                         </div>
                     `;
-                    
                     toastContainer.insertAdjacentHTML('beforeend', toastHTML);
                     const toastElement = toastContainer.lastElementChild;
                     const toast = new bootstrap.Toast(toastElement);
                     toast.show();
-                    
                     toastElement.addEventListener('hidden.bs.toast', function() {
                         toastElement.remove();
                     });
                 {% endfor %}
             {% endif %}
         });
-        
+
         // Theme toggle
         const themeToggle = document.getElementById('themeToggle');
         const html = document.documentElement;
         const icon = themeToggle.querySelector('i');
-        
+
         // Check for saved theme preference or default to light mode
         const currentTheme = localStorage.getItem('theme') || 'light';
         html.setAttribute('data-bs-theme', currentTheme);
         icon.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        
+
         themeToggle.addEventListener('click', () => {
             const currentTheme = html.getAttribute('data-bs-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
             html.setAttribute('data-bs-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            // Animate navbar and toasts for theme change
+            document.querySelectorAll('.modern-navbar, .toast, .dropdown-menu').forEach(el => {
+                el.style.transition = 'background 0.3s, color 0.3s, border-color 0.3s';
+            });
         });
 
         // Ensure dropdown functionality works

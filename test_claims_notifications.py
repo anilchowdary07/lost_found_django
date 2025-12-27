@@ -32,7 +32,7 @@ item = Item.objects.create(
     image_url='https://via.placeholder.com/300',
     location='Library',
     ai_tags=['keys', 'silver', 'lost'],
-    status='found'
+    status='reported'
 )
 
 print(f"\n✓ Test data created (owner: {owner.username}, claimer: {claimer.username})")
@@ -66,10 +66,10 @@ data = response.json()
 assert data['success'] == True
 print("✓ Claim created successfully")
 
-print("\n4. Test Item Status Changed to Claimed")
+print("\n4. Test Item Status Remains Reported After Claim")
 item.refresh_from_db()
-assert item.status == 'claimed'
-print("✓ Item status updated to 'claimed'")
+assert item.status == 'reported', f"Expected status 'reported', got '{item.status}'"
+print("✓ Item status remains 'reported' after claim (pending owner action)")
 
 print("\n5. Test Notification Created for Owner")
 notifications = Notification.objects.filter(recipient=owner)
@@ -89,7 +89,10 @@ print("\n7. Test Cannot Claim Already Claimed Item")
 response = client_claimer.post('/api/claim/', {'item_id': item.id})
 data = response.json()
 assert 'error' in data
-assert 'already claimed' in data['error'].lower()
+err = data['error'].lower()
+assert (
+    'already claimed' in err or 'already been claimed' in err
+), f"Unexpected error message: {data['error']}"
 print("✓ Cannot claim already claimed items")
 
 print("\n8. Test Notifications Page Access Requires Auth")

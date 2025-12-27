@@ -4,169 +4,35 @@
 
 {% block extra_css %}
 <style>
-    .profile-hero {
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-        color: #1e293b;
-        padding: 3rem 2rem;
-        border-radius: var(--radius);
-        margin-bottom: 2rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-    .profile-avatar {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 5px solid white;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        margin-bottom: 1.5rem;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .profile-hero::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="rgba(59,130,246,0.05)"/></svg>') repeat;
-        opacity: 0.5;
-    }
-    .profile-hero .container {
-        position: relative;
-        z-index: 1;
-    }
-    .profile-title {
-        font-size: 2.25rem;
-        font-weight: 800;
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, var(--brand-start), var(--brand-end));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    .profile-subtitle {
-        font-size: 1.1rem;
-        opacity: 0.8;
-        margin-bottom: 2rem;
-        max-width: 500px;
-        margin-left: auto;
-        margin-right: auto;
-        line-height: 1.6;
-    }
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    .stat-card {
-        background: var(--surface);
-        border-radius: var(--radius);
-        padding: 1.5rem;
-        box-shadow: 0 4px 20px rgba(2,6,23,0.06);
-        border: 1px solid rgba(255,255,255,0.8);
-        text-align: center;
-        transition: all 0.3s ease;
-    }
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 30px rgba(2,6,23,0.12);
-    }
-    .stat-icon {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        display: block;
-    }
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 800;
-        color: var(--brand-start);
-        margin-bottom: 0.5rem;
-        display: block;
-    }
-    .stat-label {
-        font-size: 0.9rem;
-        color: #64748b;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .profile-section {
-        background: var(--surface);
-        border-radius: var(--radius);
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 30px rgba(2,6,23,0.04);
-        border: 1px solid rgba(255,255,255,0.8);
-    }
-    .section-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #f1f5f9;
-    }
-    .section-icon {
-        font-size: 1.5rem;
-        color: var(--brand-start);
-    }
-    .section-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0;
-    }
-    .user-info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-    }
-    .info-item {
-        background: #fafbfc;
-        border-radius: 12px;
-        padding: 1.25rem;
-        border: 1px solid #f1f5f9;
-    }
-    .info-label {
-        font-size: 0.85rem;
-        color: #64748b;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.5rem;
-        display: block;
-    }
-    .info-value {
-        font-size: 1rem;
-        color: #1e293b;
-        font-weight: 600;
-        margin: 0;
-    }
-    .activity-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
+    
+    
+    [data-bs-theme="dark"] .profile-hero {
+        background: linear-gradient(135deg, #232946 0%, #181b2a 100%), url('https://www.transparenttextures.com/patterns/symphony.png');
+        background-blend-mode: lighten;
+        color: #c7d2fe;
+        box-shadow: 0 8px 32px 0 #23294644;
     }
     .activity-item {
-        display: flex;
         align-items: center;
         gap: 1rem;
         padding: 1rem;
-        border-radius: 12px;
-        background: #fafbfc;
+        border-radius: 1rem;
+        background: #f8fafc;
         margin-bottom: 0.75rem;
-        border: 1px solid #f1f5f9;
-        transition: all 0.3s ease;
+        border: 1px solid #e0e7ff;
+        transition: all 0.3s cubic-bezier(.4,2,.6,1);
     }
     .activity-item:hover {
-        background: #f8fafc;
-        transform: translateX(4px);
+        background: #e0e7ff;
+        transform: translateX(4px) scale(1.01);
+    }
+    [data-bs-theme="dark"] .activity-item {
+        background: #232946;
+        border: 1px solid #232946;
+        color: #c7d2fe;
+    }
+    [data-bs-theme="dark"] .activity-item:hover {
+        background: #181b2a;
     }
     .activity-icon {
         font-size: 1.25rem;
@@ -204,126 +70,276 @@
         margin-top: 2rem;
     }
     .action-btn {
-        background: linear-gradient(90deg, var(--brand-start), var(--brand-end));
+        background: linear-gradient(90deg, #6366f1, #3b82f6);
         color: #fff;
-        padding: 0.75rem 1.5rem;
-        border-radius: 12px;
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
     }
-    .action-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
-        color: #fff;
-        text-decoration: none;
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #e0e7ff;
+        margin-bottom: 1.2rem;
+        background: #e0e7ff;
     }
-    .action-btn-secondary {
-        background: #f1f5f9;
-        color: #475569;
-        border: 1px solid #e2e8f0;
-    }
-    .action-btn-secondary:hover {
-        background: #e2e8f0;
-        color: #334155;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    .rank-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: linear-gradient(90deg, #ffd874ff, #f4b84fff);
-        color: #130d0dff;
-        padding: 4rem 5rem;
-        border-radius: 20px;
-        font-weight: 700;
-        font-size: 0.9rem;
-        margin-top: 1rem;
-    }
-    .rank-badge::before {
-        content: '🏆';
-    }
-    .profile-header-controls {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        flex-wrap: wrap;
-    }
-    @media (max-width: 768px) {
-        .profile-hero {
-            padding: 2.5rem 1rem;
+    .profile-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #3b82f6;
         }
-        .profile-title {
-            font-size: 1.875rem;
+        .profile-subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 1.5rem;
         }
-        .stats-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
+        .stat-card {
+            background: #f1f5f9;
+            border-radius: 1rem;
+            padding: 1.2rem 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px #6366f122;
         }
-        .user-info-grid {
-            grid-template-columns: 1fr;
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #6366f1;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        .profile-section {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1.5rem 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px #6366f122;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #3b82f6;
+            margin: 0;
+        }
+        .info-item {
+            background: #f8fafc;
+            border-radius: 0.7rem;
+            padding: 1rem;
+            margin-bottom: 0.7rem;
+            border: 1px solid #e0e7ff;
+        }
+        .info-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            display: block;
+        }
+        .info-value {
+            font-size: 1rem;
+            color: #1e293b;
+            font-weight: 600;
+        }
+        .activity-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.8rem;
+            border-radius: 0.7rem;
+            background: #f8fafc;
+            margin-bottom: 0.5rem;
+            border: 1px solid #e0e7ff;
+        }
+        .activity-icon {
+            font-size: 1.1rem;
+            color: #6366f1;
+            min-width: 32px;
+            text-align: center;
+        }
+        .activity-content {
+            flex: 1;
+        }
+        .activity-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.2rem;
+        }
+        .activity-meta {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+        .empty-activity {
+            text-align: center;
+            padding: 1.5rem;
+            color: #64748b;
+            background: #f8fafc;
+            border-radius: 1rem;
+            border: 1px dashed #e0e7ff;
+            margin-bottom: 1rem;
+        }
+        .empty-activity-icon {
+            font-size: 2.2rem;
+            margin-bottom: 0.7rem;
+            opacity: 0.5;
         }
         .action-buttons {
-            flex-direction: column;
+            display: flex;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+            margin-top: 1.2rem;
         }
         .action-btn {
-            text-align: center;
-            justify-content: center;
+            background: linear-gradient(90deg, #6366f1, #3b82f6);
+            color: #fff;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.8rem;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            box-shadow: 0 2px 8px #6366f122;
+            border: none;
+            transition: background 0.2s;
         }
-    }
-</style>
+        .action-btn:hover {
+            background: linear-gradient(90deg, #3b82f6, #6366f1);
+            color: #fff;
+            text-decoration: none;
+        }
+        .action-btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e0e7ff;
+        }
+        .action-btn-secondary:hover {
+            background: #e0e7ff;
+            color: #334155;
+        }
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #e0e7ff;
+            color: #6366f1;
+            padding: 0.3rem 1rem;
+            border-radius: 0.8rem;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 0.7rem;
+            box-shadow: 0 2px 8px #6366f122;
+        }
+        @media (max-width: 768px) {
+            .profile-hero {
+                padding: 1.5rem 0.5rem;
+            }
+            .profile-title {
+                font-size: 1.3rem;
+            }
+            .stat-card {
+                padding: 0.8rem 0.5rem;
+            }
+            .profile-section {
+                padding: 1rem 0.5rem;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+        </style>
 {% endblock %}
 
 {% block content %}
-<section class="profile-hero">
-    <div class="container">
-        <img class="profile-avatar" 
+
+<!-- Removed duplicate/old hero and stats section. Only the new improved section remains below. -->
+
+
+<section class="profile-hero" style="background: #fff; border-radius: 1.5rem; box-shadow: 0 4px 24px 0 #6366f122; padding: 2.5rem 1.5rem 2rem 1.5rem; margin-bottom: 2rem; text-align: center;">
+    <div style="position: relative; display: inline-block;">
+        <img class="profile-avatar mb-3" 
              src="{% if user.profile and user.profile.profile_photo %}{{ user.profile.profile_photo }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name|urlencode }}&background=3b82f6&color=ffffff&size=150{% endif %}"
              alt="{{ user.first_name }} {{ user.last_name }}">
-        
-        <div class="profile-header-controls">
-            <div>
-                <h1 class="profile-title">{{ user.first_name|default:user.username }} {{ user.last_name }}</h1>
-                <p class="profile-subtitle">Track your contributions to the campus community and manage your account.</p>
-            </div>
-            <a href="{% url 'accounts:edit_profile' %}" class="btn btn-sm btn-primary">
-                <i class="fas fa-edit me-1"></i>Edit Profile
-            </a>
-        </div>
-
-        {% if user_rank and user_rank > 0 %}
-        <div class="rank-badge">
-            Rank #{{ user_rank }} in Campus Heroes
-        </div>
+        <a href="{% url 'accounts:edit_profile' %}" title="Edit Profile Photo" style="position: absolute; bottom: 10px; right: 10px; background: #fff; border-radius: 50%; box-shadow: 0 2px 8px #6366f122; padding: 0.4rem; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-edit" style="color: #6366f1; font-size: 1.1rem;"></i>
+        </a>
+    </div>
+    <h1 class="profile-title" style="font-size:2.1rem; font-weight:700; color:#3b82f6; margin-bottom:0.3rem;">
+        {{ user.first_name|default:user.username }} {{ user.last_name }}
+        {% if user.is_superuser %}
+            <span class="superuser-badge ms-2" title="Admin" style="font-size:1rem; color:#f59e42; vertical-align:middle;">
+                <i class="fas fa-shield-alt me-1"></i>Admin
+            </span>
         {% endif %}
+    </h1>
+    <p class="profile-subtitle" style="font-size:1.1rem; color:#64748b; margin-bottom:1.1rem;">Track your contributions to the campus community and manage your account.</p>
+    {% if user_rank and user_rank > 0 %}
+        <div class="rank-badge mt-3" style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.1rem;
+            background-color: #41ade7ff;
+            color: #fff;
+            font-weight: 900;
+            font-size: 1.35rem;
+            border-radius: 2.2rem;
+            padding: 1.1rem 2.5rem 1.1rem 2.1rem;
+            box-shadow: 0 8px 32px #4446eabb, 0 2px 8px #0002;
+            margin-bottom: 1.5rem;
+            border: 4px solid #d5d6fcff;
+            letter-spacing: 0.01em;
+            text-shadow: 0 2px 8px #232946cc, 0 1px 0 #6366f1cc;
+            white-space: nowrap;
+            min-width: 370px;
+            max-width: 100vw;
+            overflow: hidden;
+        ">
+            <span style="font-size: 1.7rem; margin-right: 0.7rem; filter: drop-shadow(0 2px 2px #6366f1cc);">🏆</span>
+            <span style="display:inline-block; vertical-align:middle;">Rank <span style="font-size:1.25em; font-weight:900; color:#fff; text-shadow:0 2px 4px #6366f1cc,0 1px 0 #fbbf24;">#{{ user_rank }}</span> in <span style="font-weight:700; color:#e0e7ff; text-shadow:0 1px 2px #6366f1aa;">Campus Heroes</span></span>
+        </div>
+    {% endif %}
+    <div class="motivational-banner" style="text-align:center; margin:1.2rem 0 0.5rem 0; font-size:1.08rem; color:#64748b;">
+        <i class="fas fa-bolt me-2"></i>Keep helping others—your karma and rank grow with every good deed!
     </div>
-</section>
-
-<section class="stats-grid">
-    <div class="stat-card">
-        <span class="stat-icon">📦</span>
-        <span class="stat-number">{{ reported_items }}</span>
-        <span class="stat-label">Items Reported</span>
-    </div>
-    <div class="stat-card">
-        <span class="stat-icon">✅</span>
-        <span class="stat-number">{{ claimed_items }}</span>
-        <span class="stat-label">Items Claimed</span>
-    </div>
-    <div class="stat-card">
-        <span class="stat-icon">⭐</span>
-        <span class="stat-number">{{ karma_points }}</span>
-        <span class="stat-label">Karma Points</span>
-    </div>
-    <div class="stat-card">
-        <span class="stat-icon">🎯</span>
-        <span class="stat-number">{{ user_rank|default:"-" }}</span>
-        <span class="stat-label">Community Rank</span>
+    <div class="stats-flex" style="display:flex; justify-content:center; gap:1.5rem; flex-wrap:wrap; margin-top:1.5rem;">
+        <div class="stat-card" style="background:#f1f5f9; border-radius:1rem; padding:1.1rem 1.2rem; min-width:130px; text-align:center; box-shadow:0 2px 8px #6366f122;">
+            <span class="stat-icon" style="font-size:1.7rem;">📦</span>
+            <div class="stat-number" style="font-size:1.25rem; font-weight:700; color:#6366f1;">{{ reported_items }}</div>
+            <div class="stat-label" style="font-size:0.93rem; color:#64748b;">Items Reported</div>
+        </div>
+        <div class="stat-card" style="background:#f1f5f9; border-radius:1rem; padding:1.1rem 1.2rem; min-width:130px; text-align:center; box-shadow:0 2px 8px #6366f122;">
+            <span class="stat-icon" style="font-size:1.7rem;">✅</span>
+            <div class="stat-number" style="font-size:1.25rem; font-weight:700; color:#6366f1;">{{ claimed_items }}</div>
+            <div class="stat-label" style="font-size:0.93rem; color:#64748b;">Items Claimed</div>
+        </div>
+        <div class="stat-card" style="background:#f1f5f9; border-radius:1rem; padding:1.1rem 1.2rem; min-width:130px; text-align:center; box-shadow:0 2px 8px #6366f122;">
+            <span class="stat-icon" style="font-size:1.7rem;">⭐</span>
+            <div class="stat-number" style="font-size:1.25rem; font-weight:700; color:#6366f1;">{{ karma_points }}</div>
+            <div class="stat-label" style="font-size:0.93rem; color:#64748b;">Karma Points</div>
+        </div>
+        <div class="stat-card" style="background:#f1f5f9; border-radius:1rem; padding:1.1rem 1.2rem; min-width:130px; text-align:center; box-shadow:0 2px 8px #6366f122;">
+            <span class="stat-icon" style="font-size:1.7rem;">🎯</span>
+            <div class="stat-number" style="font-size:1.25rem; font-weight:700; color:#6366f1;">{{ user_rank|default:"-" }}</div>
+            <div class="stat-label" style="font-size:0.93rem; color:#64748b;">Community Rank</div>
+        </div>
     </div>
 </section>
 
@@ -331,46 +347,9 @@
     <div class="col-lg-8">
         <section class="profile-section">
             <div class="section-header">
-                <span class="section-icon">👤</span>
-                <h2 class="section-title">Account Information</h2>
-            </div>
-
-            <div class="user-info-grid">
-                <div class="info-item">
-                    <span class="info-label">Username</span>
-                    <p class="info-value">{{ user.username }}</p>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Email Address</span>
-                    <p class="info-value">{{ user.email }}</p>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">First Name</span>
-                    <p class="info-value">{{ user.first_name|default:"Not set" }}</p>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Last Name</span>
-                    <p class="info-value">{{ user.last_name|default:"Not set" }}</p>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Member Since</span>
-                    <p class="info-value">{{ user.date_joined|date:"F d, Y" }}</p>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Account Status</span>
-                    <p class="info-value">
-                        {% if user.is_active %}Active{% else %}Inactive{% endif %}
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <section class="profile-section">
-            <div class="section-header">
                 <span class="section-icon">📋</span>
                 <h2 class="section-title">Recent Activity</h2>
             </div>
-
             {% if recent_items or recent_claims %}
             <ul class="activity-list">
                 {% for item in recent_items %}
@@ -382,7 +361,6 @@
                     </div>
                 </li>
                 {% endfor %}
-
                 {% for claim in recent_claims %}
                 <li class="activity-item">
                     <span class="activity-icon">✅</span>
@@ -414,6 +392,12 @@
                     <i class="fas fa-edit"></i>
                     Edit Profile
                 </a>
+                {% if user.is_superuser %}
+                <a href="/admin/" class="action-btn" style="background: linear-gradient(90deg, #f59e42, #f43f5e); color: #fff;">
+                    <i class="fas fa-shield-alt"></i>
+                    Admin Panel
+                </a>
+                {% endif %}
                 <a href="{% url 'items:report_item' %}" class="action-btn action-btn-secondary">
                     <i class="fas fa-plus"></i>
                     Report Found Item

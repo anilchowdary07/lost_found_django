@@ -37,7 +37,8 @@ from accounts.models import UserProfile
 
 
 def dashboard(request):
-    items = Item.objects.all().order_by('-created_at')
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    items_list = Item.objects.all()
     
     search_query = request.GET.get('search', '')
     category_filter = request.GET.get('category', '')
@@ -46,27 +47,24 @@ def dashboard(request):
     date_to = request.GET.get('date_to', '')
     tags_filter = request.GET.get('tags', '')
     sort_by = request.GET.get('sort', '-created_at')
+    quick_filter = request.GET.get('quick', '')
     
     if search_query:
         from django.db.models import Q
-        items = items.filter(
+        items_list = items_list.filter(
             Q(title__icontains=search_query) |
             Q(description__icontains=search_query) |
             Q(ai_tags__icontains=search_query)
         )
     
     if category_filter:
-        items = items.filter(category=category_filter)
-    
+        items_list = items_list.filter(category=category_filter)
     if status_filter:
-        items = items.filter(status=status_filter)
-    
+        items_list = items_list.filter(status=status_filter)
     if date_from:
-        items = items.filter(created_at__date__gte=date_from)
-    
+        items_list = items_list.filter(created_at__date__gte=date_from)
     if date_to:
-        items = items.filter(created_at__date__lte=date_to)
-    
+        items_list = items_list.filter(created_at__date__lte=date_to)
     if tags_filter:
         tags_list = [tag.strip().lower() for tag in tags_filter.split(',') if tag.strip()]
         if tags_list:
@@ -74,25 +72,37 @@ def dashboard(request):
             tag_queries = Q()
             for tag in tags_list:
                 tag_queries |= Q(ai_tags__icontains=tag)
-            items = items.filter(tag_queries)
+            items_list = items_list.filter(tag_queries)
     
     # Sorting
     if sort_by == 'title':
-        items = items.order_by('title')
+        items_list = items_list.order_by('title')
     elif sort_by == 'location':
-        items = items.order_by('location')
+        items_list = items_list.order_by('location')
     elif sort_by == 'category':
-        items = items.order_by('category')
+        items_list = items_list.order_by('category')
     elif sort_by == 'oldest':
-        items = items.order_by('created_at')
+        items_list = items_list.order_by('created_at')
     else:
-        items = items.order_by('-created_at')
-    
+        items_list = items_list.order_by('-created_at')
+
+    # Only show the 9 most recent items after all filters and ordering
+    items_list = items_list[:9]
+
+    # Quick filters
+    if quick_filter == 'my_items' and request.user.is_authenticated:
+        items_list = items_list.filter(user=request.user)
+    elif quick_filter == 'my_claims' and request.user.is_authenticated:
+        from items.models import Claim
+        claimed_item_ids = Claim.objects.filter(user=request.user).values_list('item_id', flat=True)
+        items_list = items_list.filter(id__in=claimed_item_ids)
+
+    # Only show the 9 most recent items, no pagination
+    items = items_list
     # Stats for hero section
     total_items = Item.objects.count()
     returned_items = Item.objects.filter(status='returned').count()
     active_users = User.objects.filter(is_active=True).count()
-    
     context = {
         'items': items,
         'search_query': search_query,
@@ -102,6 +112,7 @@ def dashboard(request):
         'date_to': date_to,
         'tags_filter': tags_filter,
         'sort_by': sort_by,
+        'quick_filter': quick_filter,
         'total_items': total_items,
         'returned_items': returned_items,
         'active_users': active_users,
@@ -458,18 +469,22 @@ def item_detail(request, item_id):
     item = get_object_or_404(Item, id=item_id)
     timeline = item.timeline.all()
     claim = None
-    
+    claims_history = []
+
+    from items.models import Claim
+    claims_history = Claim.objects.filter(item=item).order_by('-claimed_at')
     if hasattr(item, 'claim'):
         claim = item.claim
-    
+
     context = {
         'item': item,
         'timeline': timeline,
         'claim': claim,
+        'claims_history': claims_history,
         'can_edit': request.user.is_authenticated and request.user == item.user,
         'can_claim': request.user.is_authenticated and request.user != item.user and item.status == 'reported',
     }
-    
+
     return render(request, 'items/item_detail.html', context)
 
 
@@ -654,63 +669,116 @@ def admin_heatmap(request):
 
 
 def found_items_gallery(request):
+    total_items = Item.objects.filter(item_type='found').count()
+    available_items = Item.objects.filter(item_type='found', status='reported').count()
+    claimed_items = Item.objects.filter(item_type='found', status='claimed').count()
     items = Item.objects.filter(item_type='found').exclude(status='returned').order_by('-created_at')
     
     search_query = request.GET.get('search', '')
     category_filter = request.GET.get('category', '')
-    
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+
     if search_query:
         items = items.filter(
             Q(title__icontains=search_query) |
             Q(description__icontains=search_query) |
             Q(ai_tags__icontains=search_query)
         )
-    
+
     if category_filter:
         items = items.filter(category=category_filter)
+
+    if date_from:
+        items = items.filter(created_at__date__gte=date_from)
+    if date_to:
+        items = items.filter(created_at__date__lte=date_to)
     
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    paginator = Paginator(items, 12)  # 12 items per page
+    page_number = request.GET.get('page')
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
     context = {
-        'items': items,
+        'items': page_obj.object_list,
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
         'gallery_type': 'found',
         'gallery_title': 'Found Items',
-        'gallery_description': 'Browse items that have been found and are waiting to be claimed'
+        'gallery_description': 'Browse items that have been found and are waiting to be claimed',
+        'search_query': search_query,
+        'category_filter': category_filter,
+        'date_from': date_from,
+        'date_to': date_to,
+        'total_items': total_items,
+        'available_items': available_items,
+        'claimed_items': claimed_items,
     }
-    
     return render(request, 'items/items_gallery.html', context)
 
 
 def lost_items_gallery(request):
+    total_items = Item.objects.filter(item_type='lost').count()
+    available_items = Item.objects.filter(item_type='lost', status='reported').count()
+    claimed_items = Item.objects.filter(item_type='lost', status='claimed').count()
     items = Item.objects.filter(item_type='lost').exclude(status='returned').order_by('-created_at')
     
     search_query = request.GET.get('search', '')
     category_filter = request.GET.get('category', '')
-    
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+
     if search_query:
         items = items.filter(
             Q(title__icontains=search_query) |
             Q(description__icontains=search_query) |
             Q(ai_tags__icontains=search_query)
         )
-    
+
     if category_filter:
         items = items.filter(category=category_filter)
+
+    if date_from:
+        items = items.filter(created_at__date__gte=date_from)
+    if date_to:
+        items = items.filter(created_at__date__lte=date_to)
     
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    paginator = Paginator(items, 12)  # 12 items per page
+    page_number = request.GET.get('page')
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
     context = {
-        'items': items,
+        'items': page_obj.object_list,
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
         'gallery_type': 'lost',
         'gallery_title': 'Lost Items',
         'gallery_description': 'Browse items that have been found and are waiting to be claimed',
         'search_query': search_query,
         'category_filter': category_filter,
+        'date_from': date_from,
+        'date_to': date_to,
+        'total_items': total_items,
+        'available_items': available_items,
+        'claimed_items': claimed_items,
     }
-    
     if request.user.is_authenticated:
         context['unread_notifications'] = Notification.objects.filter(
             recipient=request.user,
             is_read=False
         ).count()
-    
-    return render(request, 'items/found_items_gallery.html', context)
+    return render(request, 'items/items_gallery.html', context)
 
 
 @login_required(login_url='accounts:login')

@@ -2,44 +2,216 @@
 
 {% block title %}Log In - Campus Lost & Found{% endblock %}
 
+{% block extra_css %}
+<style>
+    .login-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        perspective: 1000px;
+    }
+    
+    .login-card-wrapper {
+        display: flex;
+        background: var(--surface);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        width: 100%;
+        max-width: 1000px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.1s ease-out;
+        transform-style: preserve-3d;
+    }
+
+    .login-visual {
+        flex: 1;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        padding: 40px;
+        color: white;
+    }
+
+    .visual-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        transform: translateZ(50px);
+    }
+
+    .floating-icon {
+        font-size: 8rem;
+        margin-bottom: 20px;
+        filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3));
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    .visual-bg-circles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    .circle {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        backdrop-filter: blur(5px);
+    }
+
+    .login-form-side {
+        flex: 1;
+        padding: 60px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        padding: 12px 16px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        border-color: #4f46e5;
+    }
+
+    .btn-login {
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+        border: none;
+        transition: all 0.3s;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+    }
+
+    @media (max-width: 991px) {
+        .login-visual {
+            display: none;
+        }
+        .login-card-wrapper {
+            max-width: 500px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-body p-5">
-                <h2 class="card-title text-center mb-4">Log In</h2>
-
-                <form method="post" novalidate>
-                    {% csrf_token %}
-
-                    <div class="mb-3">
-                        <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
-                        {{ form.username }}
-                        {% if form.username.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.username.errors.0 }}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
-                        {{ form.password }}
-                        {% if form.password.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.password.errors.0 }}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100 mb-3">Log In</button>
-                </form>
-
-                <p class="text-center text-muted">
-                    Don't have an account? <a href="{% url 'accounts:signup' %}">Sign up here</a>
-                </p>
+<div class="login-container">
+    <div class="login-card-wrapper animate__animated animate__zoomIn" id="parallaxCard">
+        <!-- Visual Side -->
+        <div class="login-visual">
+            <div class="visual-bg-circles">
+                <div class="circle" style="width: 200px; height: 200px; top: -50px; left: -50px;"></div>
+                <div class="circle" style="width: 150px; height: 150px; bottom: -30px; right: -30px;"></div>
+                <div class="circle" style="width: 100px; height: 100px; top: 40%; right: 10%;"></div>
             </div>
+            <div class="visual-content">
+                <div class="floating-icon">
+                    <i class="fas fa-search-plus"></i>
+                </div>
+                <h3>Lost & Found</h3>
+                <p class="opacity-75">Connect with your community and find what you've lost.</p>
+            </div>
+        </div>
+
+        <!-- Form Side -->
+        <div class="login-form-side">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Welcome Back</h2>
+                <p class="text-muted">Enter your details to access your account</p>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-muted"></i></span>
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.username.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-lock text-muted"></i></span>
+                        {{ form.password }}
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.password.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-login w-100 mb-4 text-white">
+                    Sign In <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </form>
+
+            <p class="text-center text-muted mb-0">
+                New here? <a href="{% url 'accounts:signup' %}" class="text-decoration-none fw-bold text-primary">Create an account</a>
+            </p>
         </div>
     </div>
 </div>
+
+<script>
+    const card = document.getElementById('parallaxCard');
+    const container = document.querySelector('.login-container');
+    const floatingIcon = document.querySelector('.floating-icon');
+
+    container.addEventListener('mousemove', (e) => {
+        const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+        const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+        
+        card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        
+        // Move icon slightly more for more depth
+        if (floatingIcon) {
+            floatingIcon.style.transform = `translateZ(100px) rotateY(${xAxis * 1.5}deg) rotateX(${yAxis * 1.5}deg)`;
+        }
+    });
+
+    container.addEventListener('mouseenter', () => {
+        card.style.transition = 'none';
+    });
+
+    container.addEventListener('mouseleave', () => {
+        card.style.transition = 'transform 0.5s ease';
+        card.style.transform = 'rotateY(0deg) rotateX(0deg)';
+        if (floatingIcon) {
+            floatingIcon.style.transform = 'translateZ(0px) rotate(0deg)';
+        }
+    });
+</script>
 {% endblock %}

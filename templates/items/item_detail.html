@@ -4,42 +4,228 @@
 
 {% block extra_css %}
 <style>
+            .item-detail-main-card {
+                position: relative;
+                background: linear-gradient(135deg, #fff 80%, #f1f5fa 100%);
+                border: 1.5px solid #e0e7ef;
+                box-shadow: 0 8px 32px rgba(2,6,23,0.13);
+                border-radius: 28px;
+                padding: 2.7rem 2.7rem 2.2rem 2.7rem;
+                margin-bottom: 2.5rem;
+                transition: box-shadow 0.2s, transform 0.2s;
+                overflow: hidden;
+            }
+            .item-detail-main-card:hover {
+                box-shadow: 0 12px 36px rgba(99,102,241,0.13), 0 2px 8px rgba(2,6,23,0.10);
+                transform: translateY(-2px) scale(1.01);
+            }
+            .item-detail-main-card > *:not(:first-child) {
+                margin-top: 1.5rem;
+            }
+            @media (max-width: 991px) {
+                .item-detail-main-card {
+                    padding: 1.2rem 0.7rem;
+                }
+            }
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%) !important;
+        }
+        .item-detail-main-card {
+            box-shadow: 0 8px 32px rgba(2,6,23,0.13);
+            border-radius: 24px;
+            padding: 2.5rem 2.5rem 2rem 2.5rem;
+            background: #fff;
+            margin-bottom: 2.5rem;
+        }
+        @media (max-width: 991px) {
+            .item-detail-main-card {
+                padding: 1.2rem 0.7rem;
+            }
+        }
+        .item-image {
+            margin-bottom: 2rem;
+        }
+        .item-image {
+            background: #f8fafc;
+            min-height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.2rem;
+        }
+        .item-image img, .item-image-placeholder {
+            width: 100%;
+            max-width: 100%;
+            max-height: 420px;
+            min-height: 180px;
+            object-fit: contain;
+            background: transparent;
+            display: block;
+            margin: 0 auto;
+            border-radius: 18px;
+            box-shadow: none;
+        }
+        @media (max-width: 768px) {
+            .item-image {
+                min-height: 160px;
+                padding: 0.5rem;
+            }
+            .item-image img, .item-image-placeholder {
+                min-height: 80px;
+                max-height: 220px;
+            }
+        }
+        @media (max-width: 768px) {
+            .item-image img, .item-image-placeholder {
+                height: 220px;
+            }
+        }
+        .timeline {
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.08rem;
+        }
+        .timeline-item {
+            padding: 1.3rem 1.2rem;
+            font-size: 1.08rem;
+        }
+        .related-items-section {
+            margin-top: 3.5rem;
+            padding: 2rem 1.2rem 1.2rem 1.2rem;
+            background: #f1f5fa;
+            border-radius: 18px;
+            box-shadow: 0 2px 12px rgba(99,102,241,0.07);
+        }
+        .related-items-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+        }
+    .related-items-section {
+        margin-top: 2.5rem;
+    }
+    .related-items-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    .related-items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+    }
+    .related-item-card {
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        background: #fff;
+        overflow: hidden;
+        transition: box-shadow 0.2s, transform 0.2s;
+        cursor: pointer;
+    }
+    .related-item-card:hover {
+        box-shadow: 0 6px 18px rgba(99,102,241,0.13);
+        transform: translateY(-2px) scale(1.03);
+    }
+    .related-item-img {
+        width: 100%;
+        height: 110px;
+        object-fit: cover;
+        background: #f1f5f9;
+    }
+    .related-item-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0.5rem 0.7rem 0.7rem 0.7rem;
+        color: #334155;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
     .item-image {
         position: relative;
         overflow: hidden;
-        border-radius: 12px 12px 0 0;
+        border-radius: 18px;
+        box-shadow: 0 8px 32px rgba(2,6,23,0.10);
+        margin-bottom: 1rem;
     }
     .item-image img {
         width: 100%;
-        height: 650px; /* increased for larger detail view */
+        height: 400px;
         object-fit: cover;
-        transition: transform 0.3s ease;
+        transition: transform 0.3s cubic-bezier(.4,2,.6,1);
         cursor: pointer;
+        border-radius: 18px;
     }
     .item-image:hover img {
-        transform: scale(1.05);
+        transform: scale(1.07);
     }
     .item-image-placeholder {
-        height: 650px;
+        height: 400px;
         background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        border-radius: 12px 12px 0 0;
+        border-radius: 18px;
         color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
     }
-
-    /* Responsive adjustments: smaller height on small screens */
     @media (max-width: 768px) {
         .item-image img,
         .item-image-placeholder {
-            height: 350px;
+            height: 220px;
         }
     }
     .status-badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: 12px;
-        font-weight: 600;
+        font-size: 0.8rem;
+        padding: 0.35rem 0.8rem;
+        border-radius: 16px;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        margin-bottom: 0.25rem;
+    }
+    .item-tag {
+        background: #e0e7ff;
+        color: #3730a3;
+        padding: 0.3rem 0.8rem;
+        border-radius: 16px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-right: 0.3rem;
+        margin-bottom: 0.3rem;
+        display: inline-block;
+    }
+    .sticky-action-bar {
+        position: sticky;
+        top: 0;
+        z-index: 1050;
+        background: rgba(255,255,255,0.97);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        padding: 0.75rem 1rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        border-radius: 0 0 18px 18px;
+        margin-bottom: 1.5rem;
+        animation: fadeInDown 0.7s;
+    }
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .btn-share {
+        background: #f1f5f9;
+        color: #334155;
+        border: none;
+        border-radius: 12px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+    .btn-share:hover {
+        background: #e0e7ef;
+        color: #1e293b;
     }
     .timeline-item {
         display: flex;
@@ -49,6 +235,9 @@
         border-left: 3px solid #e2e8f0;
         position: relative;
         margin-bottom: 1rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
     .timeline-item::before {
         content: '';
@@ -58,7 +247,7 @@
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        background: #e2e8f0;
+        background: #6366f1;
     }
     .timeline-marker {
         width: 40px;
@@ -69,10 +258,13 @@
         justify-content: center;
         font-size: 1.25rem;
         flex-shrink: 0;
+        background: #6366f1;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(99,102,241,0.12);
     }
     .timeline-content h6 {
         margin: 0 0 0.25rem 0;
-        font-weight: 600;
+        font-weight: 700;
         color: #1e293b;
     }
     .timeline-content small {
@@ -81,9 +273,10 @@
     .claim-section {
         background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
         border: 1px solid #f59e0b;
-        border-radius: 12px;
+        border-radius: 16px;
         padding: 1.5rem;
         margin-top: 1.5rem;
+        box-shadow: 0 2px 8px rgba(245,158,11,0.08);
     }
     .action-buttons {
         display: flex;
@@ -95,14 +288,16 @@
         background: linear-gradient(90deg, #f59e0b, #d97706);
         color: white;
         border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s ease;
+        padding: 0.85rem 2rem;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s cubic-bezier(.4,2,.6,1);
+        box-shadow: 0 2px 8px rgba(245,158,11,0.12);
     }
     .btn-claim:hover {
         background: linear-gradient(90deg, #d97706, #b45309);
-        transform: translateY(-2px);
+        transform: translateY(-2px) scale(1.03);
         box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
         color: white;
     }
@@ -110,20 +305,44 @@
 {% endblock %}
 
 {% block content %}
+
+<!-- Sticky Action Bar -->
+<div class="sticky-action-bar shadow-sm mb-3">
+    <a href="{% url 'items:dashboard' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Back</a>
+    {% if can_claim %}
+    <button class="btn btn-claim claim-btn" data-item-id="{{ item.id }}" data-item-title="{{ item.title }}">
+        <i class="fas fa-hand-holding-heart me-1"></i>Claim This Item
+    </button>
+    {% endif %}
+    <button class="btn btn-share" id="shareBtn" onclick="copyItemLink(event)"><i class="fas fa-share-alt me-1"></i>Share</button>
+</div>
+        <!-- Related Items Section -->
+        <div class="related-items-section">
+            <div class="related-items-title"><i class="fas fa-link me-1"></i>Related Items</div>
+            <div class="related-items-grid">
+                {% for related in related_items %}
+                <a href="{% url 'items:item_detail' related.id %}" class="related-item-card">
+                    {% if related.image_url %}
+                    <img src="{{ related.image_url }}" class="related-item-img" alt="{{ related.title }}">
+                    {% else %}
+                    <div class="related-item-img d-flex align-items-center justify-content-center text-muted" style="font-size:2rem;">📦</div>
+                    {% endif %}
+                    <div class="related-item-title">{{ related.title }}</div>
+                </a>
+                {% empty %}
+                <div class="text-muted">No related items found.</div>
+                {% endfor %}
+            </div>
+        </div>
+
 <!-- Hidden form for CSRF token -->
 <form style="display: none;">
     {% csrf_token %}
 </form>
 
-<div class="row mb-4">
-    <div class="col-md-8">
-        <a href="{% url 'items:dashboard' %}" class="text-decoration-none">← Back to Dashboard</a>
-    </div>
-</div>
-
 <div class="row">
-    <div class="col-md-7">
-        <div class="card">
+    <div class="col-md-8">
+        <div class="item-detail-main-card">
             {% if item.image_url %}
             <div class="item-image">
                 <img src="{{ item.image_url }}" class="card-img-top img-large" alt="{{ item.title }}" data-bs-toggle="modal" data-bs-target="#imageModal">
@@ -211,7 +430,7 @@
                     <h5 class="text-muted mb-2">AI-Generated Tags</h5>
                     <div>
                         {% for tag in item.ai_tags %}
-                        <span class="badge bg-light text-dark me-1 mb-1">{{ tag }}</span>
+                        <span class="item-tag">{{ tag }}</span>
                         {% endfor %}
                     </div>
                 </div>
@@ -223,7 +442,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <p class="mb-1"><strong>Claimed by:</strong> {{ claim.claimer.get_full_name|default:claim.claimer.username }}</p>
-                            <p class="mb-1"><strong>Claimed at:</strong> {{ claim.claimed_at|date:"M d, Y \a\t H:i" }}</p>
+                            <p class="mb-1"><strong>Claimed at:</strong> {{ claim.claimed_at|date:"M d, Y \\a\\t H:i" }}</p>
                         </div>
                         {% if claim.message %}
                         <div class="col-md-6">
@@ -232,6 +451,31 @@
                         </div>
                         {% endif %}
                     </div>
+                </div>
+                {% endif %}
+
+                {% if claims_history and claims_history|length > 0 %}
+                <div class="mt-4">
+                    <h5 class="text-muted mb-2"><i class="fas fa-history me-2"></i>Claim History</h5>
+                    <ul class="list-group">
+                        {% for c in claims_history %}
+                        <li class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                            <div>
+                                <strong>{{ c.claimer.get_full_name|default:c.claimer.username }}</strong>
+                                <span class="badge bg-secondary ms-2">{{ c.get_status_display }}</span>
+                                <br>
+                                <small class="text-muted">Claimed at: {{ c.claimed_at|date:"M d, Y H:i" }}</small>
+                                {% if c.message %}<br><span class="text-muted fst-italic">"{{ c.message }}"</span>{% endif %}
+                            </div>
+                            <div class="mt-2 mt-md-0">
+                                {% if c.accepted_at %}<span class="badge bg-success">Accepted</span>{% endif %}
+                                {% if c.rejected_at %}<span class="badge bg-danger">Rejected</span>{% endif %}
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">No claims yet.</li>
+                        {% endfor %}
+                    </ul>
                 </div>
 
                 {% if can_edit %}
@@ -274,8 +518,8 @@
         </div>
     </div>
 
-    <div class="col-md-5">
-        <div class="card">
+    <div class="col-md-4">
+        <div class="card" style="box-shadow:0 4px 18px rgba(99,102,241,0.10);border-radius:18px;">
             <div class="card-header bg-light">
                 <h5 class="mb-0">📊 Status Timeline</h5>
             </div>
@@ -328,16 +572,67 @@
 </div>
 
 <script>
+function copyItemLink(e) {
+    e.preventDefault();
+    const url = window.location.href;
+    // Try Clipboard API first
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url).then(function() {
+            showToast('Link copied to clipboard!', 'success');
+        }, function() {
+            fallbackCopyTextToClipboard(url);
+        });
+    } else {
+        fallbackCopyTextToClipboard(url);
+    }
+}
+
+function fallbackCopyTextToClipboard(text) {
+    // Create a temporary textarea to select/copy
+    var textArea = document.createElement("textarea");
+    textArea.value = text;
+    // Avoid scrolling to bottom
+    textArea.style.position = "fixed";
+    textArea.style.top = 0;
+    textArea.style.left = 0;
+    textArea.style.width = '2em';
+    textArea.style.height = '2em';
+    textArea.style.padding = 0;
+    textArea.style.border = 'none';
+    textArea.style.outline = 'none';
+    textArea.style.boxShadow = 'none';
+    textArea.style.background = 'transparent';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+        var successful = document.execCommand('copy');
+        if (successful) {
+            showToast('Link copied to clipboard!', 'success');
+        } else {
+            showToast('Failed to copy link', 'error');
+        }
+    } catch (err) {
+        showToast('Failed to copy link', 'error');
+    }
+    document.body.removeChild(textArea);
+}
+}
+function showGlobalSpinner(show) {
+    const spinner = document.getElementById('globalSpinner');
+    if (!spinner) return;
+    spinner.style.display = show ? 'flex' : 'none';
+}
 {% if claim %}
 async function generateQRCode() {
     const btn = document.getElementById('generateQRBtn');
     btn.disabled = true;
     btn.innerHTML = '⏳ Generating...';
-    
+    showGlobalSpinner(true);
     try {
         const response = await fetch('{% url "items:generate_qr_code" claim.id %}');
         const data = await response.json();
-        
+        showGlobalSpinner(false);
         if (data.success) {
             document.getElementById('qrCodeImage').src = data.qr_code;
             document.getElementById('qrCodeId').textContent = 'Code: ' + data.qr_id;
@@ -348,6 +643,7 @@ async function generateQRCode() {
             throw new Error(data.error || 'Failed to generate QR code');
         }
     } catch (error) {
+        showGlobalSpinner(false);
         showToast('Error: ' + error.message, 'error');
         btn.disabled = false;
         btn.innerHTML = 'Generate QR Code';
@@ -358,13 +654,14 @@ function markItemReturned() {
     if (confirm('Mark this item as returned? This will award karma points to the finder.')) {
         const formData = new FormData();
         formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-        
-        fetch('{% url "items:mark_item_returned" item.id %}', {
+        showGlobalSpinner(true);
+        fetch('{% url 'items:mark_item_returned' item.id %}', {
             method: 'POST',
             body: formData
         })
         .then(response => response.json())
         .then(data => {
+            showGlobalSpinner(false);
             if (data.success) {
                 showToast(data.message, 'success');
                 setTimeout(() => location.reload(), 1500);
@@ -372,7 +669,7 @@ function markItemReturned() {
                 showToast('Error: ' + data.error, 'error');
             }
         })
-        .catch(error => showToast('Error: ' + error, 'error'));
+        .catch(error => { showGlobalSpinner(false); showToast('Error: ' + error, 'error'); });
     }
 }
 
