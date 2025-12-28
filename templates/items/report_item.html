@@ -270,6 +270,7 @@ function showImagePreview(file) {
     reader.onload = (event) => {
         previewImg.src = event.target.result;
         imagePreview.style.display = 'block';
+        showToast('Image selected successfully!', 'success');
     };
     reader.readAsDataURL(file);
 }
