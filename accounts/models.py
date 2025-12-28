@@ -1,3 +1,6 @@
+
+from django.db import models
+from django.contrib.auth.models import User
 import uuid
 
 class EmailVerificationToken(models.Model):
@@ -8,8 +11,6 @@ class EmailVerificationToken(models.Model):
 
     def __str__(self):
         return f"Token for {self.user.email}"
-from django.db import models
-from django.contrib.auth.models import User
 
 
 class UserProfile(models.Model):
