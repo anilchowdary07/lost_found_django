@@ -171,6 +171,7 @@
                         <span id="dragDropText">Drag & drop an image here, or click to select</span>
                         {{ form.image }}
                     </div>
+                    <div id="imageFileName" class="text-success mt-2" style="display:none;"></div>
                     {% if form.image.errors %}
                         <div class="invalid-feedback d-block">{{ form.image.errors.0 }}</div>
                     {% endif %}
@@ -256,13 +257,32 @@ if (dragDropArea && imageInput) {
         if (e.dataTransfer.files.length > 0) {
             imageInput.files = e.dataTransfer.files;
             showImagePreview(e.dataTransfer.files[0]);
+            showImageFileName(e.dataTransfer.files[0]);
         }
     });
     imageInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
             showImagePreview(e.target.files[0]);
+            showImageFileName(e.target.files[0]);
+        } else {
+            hideImageFileName();
         }
     });
+}
+function showImageFileName(file) {
+    const fileNameDiv = document.getElementById('imageFileName');
+    if (fileNameDiv) {
+        fileNameDiv.textContent = `Selected: ${file.name}`;
+        fileNameDiv.style.display = 'block';
+    }
+}
+
+function hideImageFileName() {
+    const fileNameDiv = document.getElementById('imageFileName');
+    if (fileNameDiv) {
+        fileNameDiv.textContent = '';
+        fileNameDiv.style.display = 'none';
+    }
 }
 
 function showImagePreview(file) {
@@ -384,16 +404,18 @@ function validateForm() {
 
 document.getElementById('reportForm').addEventListener('submit', (e) => {
     const errors = validateForm();
-    
     if (errors.length > 0) {
         e.preventDefault();
         errors.forEach(error => showToast(error, 'error'));
+        const imageInput = document.getElementById('id_image');
+        if (!imageInput.files || imageInput.files.length === 0) {
+            hideImageFileName();
+        }
         return false;
     }
-    
     const submitBtn = document.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Submitting...';
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Uploading...';
 });
 
 function setupRadioButtons() {
