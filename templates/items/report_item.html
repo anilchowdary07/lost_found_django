@@ -167,9 +167,9 @@
                 </div>
                 <!-- Drag & Drop Image Upload -->
                 <div class="modern-form-floating">
-                    <div id="dragDropArea" class="drag-drop-area" tabindex="0" style="cursor:pointer;">
+                    <div id="dragDropArea" class="drag-drop-area" tabindex="0" style="cursor:pointer; position:relative;">
                         <span id="dragDropText">Drag & drop an image here, or click to select</span>
-                        {{ form.image }}
+                        <input type="file" name="image" id="id_image" accept="image/*" style="opacity:0;position:absolute;top:0;left:0;width:100%;height:100%;cursor:pointer;z-index:2;" required>
                     </div>
                     <div id="imageFileName" class="text-success mt-2" style="display:none;"></div>
                     <style>
@@ -249,10 +249,7 @@ const imagePreview = document.getElementById('imagePreview');
 const dragDropText = document.getElementById('dragDropText');
 
 if (dragDropArea && imageInput) {
-    dragDropArea.addEventListener('click', (e) => {
-        e.preventDefault();
-        imageInput.click();
-    });
+    // No need to trigger click, input covers the area and is clickable
     dragDropArea.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();

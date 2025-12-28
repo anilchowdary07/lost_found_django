@@ -198,7 +198,11 @@ def report_item(request):
                 item.save()
                 
                 messages.success(request, 'Item reported successfully!', extra_tags='success')
-                return redirect('items:dashboard')
+                # Redirect to correct gallery based on item_type
+                if item.item_type == 'lost':
+                    return redirect('items:lost_items_gallery')
+                else:
+                    return redirect('items:found_items_gallery')
             
             except Exception as e:
                 messages.error(request, f'An unexpected error occurred: {str(e)}', extra_tags='error')
@@ -1180,3 +1184,18 @@ def resolve_dispute(request):
         return JsonResponse({'error': 'Dispute not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_item(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
+    if item.user != request.user:
+        return JsonResponse({"error": "Not authorized to delete this item."}, status=403)
+    item.delete()
+    messages.success(request, "Item deleted successfully.")
+    # Redirect to the correct gallery
+    if item.item_type == "lost":
+        return JsonResponse({"success": True, "redirect": "/items/lost/"})
+    else:
+        return JsonResponse({"success": True, "redirect": "/items/gallery/"})
