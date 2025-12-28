@@ -1,4 +1,3 @@
-    path('api/notify-owner/', views.notify_owner, name='notify_owner'),
 from django.urls import path
 from . import views
 
@@ -18,6 +17,7 @@ urlpatterns = [
     path('<int:item_id>/', views.item_detail, name='item_detail'),
     path('<int:item_id>/edit/', views.edit_item, name='edit_item'),
     path('api/<int:item_id>/delete/', views.delete_item, name='delete_item'),
+    path('api/notify-owner/', views.notify_owner, name='notify_owner'),
     path('api/claim/<int:claim_id>/qrcode/', views.generate_qr_code_view, name='generate_qr_code'),
     path('api/qrcode/verify/', views.verify_qr_code, name='verify_qr_code'),
     path('api/<int:item_id>/mark-returned/', views.mark_item_returned, name='mark_item_returned'),

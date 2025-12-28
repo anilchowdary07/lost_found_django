@@ -55,9 +55,27 @@ class SignUpForm(UserCreationForm):
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
+        if not email.lower().endswith('@vitapstudent.ac.in'):
+            raise forms.ValidationError('Only @vitapstudent.ac.in email addresses are allowed.')
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError('This email is already registered.')
         return email
+
+class EmailLoginForm(forms.Form):
+    email = forms.EmailField(
+        max_length=254,
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Email address'
+        })
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Password'
+        })
+    )
 
     def save(self, commit=True):
         user = super().save(commit=False)

@@ -1,3 +1,16 @@
+# Email (Mailjet SMTP)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'in-v3.mailjet.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+try:
+    EMAIL_HOST_USER = config('MAILJET_API_KEY')
+    EMAIL_HOST_PASSWORD = config('MAILJET_API_SECRET')
+    DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+except Exception:
+    EMAIL_HOST_USER = os.environ.get('MAILJET_API_KEY', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('MAILJET_API_SECRET', '')
+    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'your_verified_sender@example.com')
 """
 Django settings for lost_found project.
 

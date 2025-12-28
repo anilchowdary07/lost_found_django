@@ -5,7 +5,7 @@ from django.contrib import messages
 import cloudinary.uploader
 import tempfile
 import os
-from .forms import SignUpForm, LoginForm, EditProfileForm
+from .forms import SignUpForm, LoginForm, EditProfileForm, EmailLoginForm
 
 
 def signup(request):
@@ -16,10 +16,20 @@ def signup(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             try:
-                user = form.save()
-                login(request, user)
-                messages.success(request, 'Account created successfully! Welcome.', extra_tags='success')
-                return redirect('items:dashboard')
+                user = form.save(commit=False)
+                user.is_active = False  # Mark inactive until email verified
+                user.save()
+                # Create verification token
+                from .models import EmailVerificationToken
+                token_obj, _ = EmailVerificationToken.objects.get_or_create(user=user)
+                # Send verification email
+                from django.core.mail import send_mail
+                from django.conf import settings
+                verify_url = request.build_absolute_uri(f"/accounts/verify-email/{token_obj.token}/")
+                subject = "Verify your email for Campus Lost & Found"
+                message = f"Hello {user.username},\n\nPlease verify your email by clicking the link below:\n{verify_url}\n\nIf you did not sign up, ignore this email."
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=True)
+                return render(request, 'accounts/verify_notice.html', {'email': user.email})
             except Exception as e:
                 messages.error(request, f'An error occurred during signup: {str(e)}', extra_tags='error')
         else:
@@ -31,26 +41,42 @@ def signup(request):
 
     return render(request, 'accounts/signup.html', {'form': form})
 
+# Email verification view
+from django.http import HttpResponse
+def verify_email(request, token):
+    from .models import EmailVerificationToken
+    from django.contrib.auth.models import User
+    try:
+        token_obj = EmailVerificationToken.objects.get(token=token, is_used=False)
+        user = token_obj.user
+        user.is_active = True
+        user.save()
+        token_obj.is_used = True
+        token_obj.save()
+        return HttpResponse("<h2>Email verified! You can now <a href='/accounts/login/'>login</a>.</h2>")
+    except EmailVerificationToken.DoesNotExist:
+        return HttpResponse("<h2>Invalid or expired verification link.</h2>")
+
 
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('items:dashboard')
 
     if request.method == 'POST':
-        form = LoginForm(request.POST)
+        form = EmailLoginForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
+            email = form.cleaned_data['email'].lower()
             password = form.cleaned_data['password']
-            
             try:
-                user = authenticate(request, username=username, password=password)
-
+                from django.contrib.auth.models import User
+                user = User.objects.filter(email=email).first()
                 if user is not None:
-                    login(request, user)
-                    messages.success(request, f'Welcome back, {user.username}!', extra_tags='success')
-                    return redirect('items:dashboard')
-                else:
-                    messages.error(request, 'Invalid username or password.', extra_tags='error')
+                    user_auth = authenticate(request, username=user.username, password=password)
+                    if user_auth is not None:
+                        login(request, user_auth)
+                        messages.success(request, f'Welcome back, {user_auth.username}!', extra_tags='success')
+                        return redirect('items:dashboard')
+                messages.error(request, 'Invalid email or password.', extra_tags='error')
             except Exception as e:
                 messages.error(request, f'An error occurred during login: {str(e)}', extra_tags='error')
         else:
@@ -58,7 +84,7 @@ def login_view(request):
                 for error in errors:
                     messages.error(request, f'{error}', extra_tags='error')
     else:
-        form = LoginForm()
+        form = EmailLoginForm()
 
     return render(request, 'accounts/login.html', {'form': form})
 
