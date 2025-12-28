@@ -135,19 +135,23 @@ def report_item(request):
         form = ItemForm(request.POST, request.FILES)
         if form.is_valid():
             image_file = request.FILES.get('image')
-            
             if not image_file:
                 messages.error(request, 'Please upload an image.', extra_tags='error')
                 return render(request, 'items/report_item.html', {'form': form})
-            
+
+            # Create item instance early so it's always defined
+            item = form.save(commit=False)
+            item.item_type = form.cleaned_data['item_type']
+            item.user = request.user
+
             temp_image_path = None
             try:
                 temp_image_path = save_temp_image(image_file)
-                
+
                 category = form.cleaned_data.get('category') or 'other'
                 manual_tags = form.cleaned_data.get('manual_tags', '')
                 ai_tags = [tag.strip() for tag in manual_tags.split(',') if tag.strip()] if manual_tags else []
-                
+
                 # Upload image
                 try:
                     cloudinary_result = cloudinary.uploader.upload(temp_image_path)
@@ -157,40 +161,36 @@ def report_item(request):
                         import uuid
                         from django.conf import settings
                         from pathlib import Path
-                        
+
                         media_dir = Path(settings.MEDIA_ROOT) / 'items'
                         media_dir.mkdir(parents=True, exist_ok=True)
                         file_extension = Path(temp_image_path).suffix
                         unique_filename = f"{uuid.uuid4()}{file_extension}"
                         local_path = media_dir / unique_filename
-                        
+
                         import shutil
                         shutil.copy2(temp_image_path, local_path)
                         image_url = f"{settings.MEDIA_URL}items/{unique_filename}"
-                        
+
                         messages.warning(request, 'Image upload to cloud failed. Image saved locally.', extra_tags='warning')
                 except Exception as e:
                     # Cloudinary failed, save locally
                     import uuid
                     from django.conf import settings
                     from pathlib import Path
-                    
+
                     media_dir = Path(settings.MEDIA_ROOT) / 'items'
                     media_dir.mkdir(parents=True, exist_ok=True)
                     file_extension = Path(temp_image_path).suffix
                     unique_filename = f"{uuid.uuid4()}{file_extension}"
                     local_path = media_dir / unique_filename
-                    
+
                     import shutil
                     shutil.copy2(temp_image_path, local_path)
                     image_url = f"{settings.MEDIA_URL}items/{unique_filename}"
-                    
+
                     messages.warning(request, 'Image upload to cloud failed. Image saved locally.', extra_tags='warning')
-                
-                    item = form.save(commit=False)
-                    # Ensure item_type is set from the form, not just the model default
-                    item.item_type = form.cleaned_data['item_type']
-                item.user = request.user
+
                 item.image_url = image_url
                 item.category = category
                 item.title = sanitize_title(item.title)
