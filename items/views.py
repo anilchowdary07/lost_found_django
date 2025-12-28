@@ -187,7 +187,9 @@ def report_item(request):
                     
                     messages.warning(request, 'Image upload to cloud failed. Image saved locally.', extra_tags='warning')
                 
-                item = form.save(commit=False)
+                    item = form.save(commit=False)
+                    # Ensure item_type is set from the form, not just the model default
+                    item.item_type = form.cleaned_data['item_type']
                 item.user = request.user
                 item.image_url = image_url
                 item.category = category
