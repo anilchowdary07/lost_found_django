@@ -1,3 +1,35 @@
+@login_required(login_url='accounts:login')
+@require_http_methods(["POST"])
+def notify_owner(request):
+    item_id = request.POST.get('item_id')
+    message = request.POST.get('message', '').strip()
+    if not item_id or not message:
+        return JsonResponse({'error': 'Item ID and message are required.'}, status=400)
+    try:
+        item = Item.objects.get(id=item_id)
+        if item.item_type != 'lost':
+            return JsonResponse({'error': 'Notify Owner is only for lost items.'}, status=400)
+        if item.user == request.user:
+            return JsonResponse({'error': 'You cannot notify yourself.'}, status=400)
+        # Create in-app notification
+        from .models import Notification
+        notif_msg = f"{request.user.username} says: {message}"
+        Notification.objects.create(
+            recipient=item.user,
+            claim=None,
+            message=notif_msg
+        )
+        # Send email
+        from django.core.mail import send_mail
+        from django.conf import settings
+        subject = f"Someone found your lost item: {item.title}"
+        body = f"Hello {item.user.username},\n\n{request.user.username} has notified you about your lost item '{item.title}'.\n\nMessage: {message}\n\nYou can reply to {request.user.email} to arrange pickup.\n\nCampus Lost & Found Team"
+        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [item.user.email], fail_silently=True)
+        return JsonResponse({'success': True})
+    except Item.DoesNotExist:
+        return JsonResponse({'error': 'Item not found.'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': f'Failed to notify owner: {str(e)}'}, status=500)
 import json
 import os
 import tempfile
@@ -488,7 +520,10 @@ def item_detail(request, item_id):
         'claim': claim,
         'claims_history': claims_history,
         'can_edit': request.user.is_authenticated and request.user == item.user,
-        'can_claim': request.user.is_authenticated and request.user != item.user and item.status == 'reported',
+        # Only allow claim for found items
+        'can_claim': request.user.is_authenticated and request.user != item.user and item.status == 'reported' and item.item_type == 'found',
+        # Allow notify for lost items
+        'can_notify': request.user.is_authenticated and request.user != item.user and item.status == 'reported' and item.item_type == 'lost',
     }
 
     return render(request, 'items/item_detail.html', context)

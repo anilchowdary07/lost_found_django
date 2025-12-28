@@ -15,7 +15,11 @@ def create_claim(item_id, claimer_user, message=''):
         
         # Check if claim already exists for this item
         if hasattr(item, 'claim') and item.claim:
-            return {'error': 'This item has already been claimed by someone else'}
+            # Only block if claim is pending or accepted
+            if item.claim.status in ['pending', 'accepted']:
+                return {'error': 'This item has already been claimed by someone else'}
+            # If claim is rejected or completed, allow new claim (delete old claim)
+            item.claim.delete()
         
         # Use get_or_create to handle race conditions
         try:

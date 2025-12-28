@@ -314,6 +314,11 @@
         <i class="fas fa-hand-holding-heart me-1"></i>Claim This Item
     </button>
     {% endif %}
+    {% if can_notify %}
+    <button class="btn btn-warning notify-btn" data-item-id="{{ item.id }}" data-item-title="{{ item.title }}" onclick="openNotifyModal()">
+        <i class="fas fa-bullhorn me-1"></i>Notify Owner
+    </button>
+    {% endif %}
     <button class="btn btn-share" id="shareBtn" onclick="copyItemLink(event)"><i class="fas fa-share-alt me-1"></i>Share</button>
 </div>
         <!-- Related Items Section -->
@@ -376,6 +381,11 @@
                         {% if can_claim %}
                         <button class="btn btn-claim claim-btn" data-item-id="{{ item.id }}" data-item-title="{{ item.title }}">
                             <i class="fas fa-hand-holding-heart me-1"></i>Claim This Item
+                        </button>
+                        {% endif %}
+                        {% if can_notify %}
+                        <button class="btn btn-warning notify-btn" data-item-id="{{ item.id }}" data-item-title="{{ item.title }}" onclick="openNotifyModal()">
+                            <i class="fas fa-bullhorn me-1"></i>Notify Owner
                         </button>
                         {% endif %}
                         {% if user.is_authenticated and not can_edit %}
@@ -524,14 +534,70 @@
                 </div>
                 {% endif %}
 
-                {% elif can_claim %}
+                {% elif can_notify %}
                 <div class="claim-section">
-                    <h5 class="mb-2"><i class="fas fa-info-circle me-2"></i>Is this your item?</h5>
-                    <p class="mb-3 text-muted">Click the "Claim This Item" button above to submit a claim. The owner will be notified and can share their contact information with you.</p>
+                    <h5 class="mb-2"><i class="fas fa-info-circle me-2"></i>Did you find this item?</h5>
+                    <p class="mb-3 text-muted">If you found this lost item, click the "Notify Owner" button above to send a message to the owner. They will be able to contact you for pickup.</p>
                     <div class="alert alert-light border">
-                        <small><strong>Contact Method:</strong> After claiming, you'll receive the owner's email address ({{ item.user.email }}) to arrange pickup.</small>
+                        <small><strong>Contact Method:</strong> Your message will be sent to the owner. They can reply to your email to arrange pickup.</small>
                     </div>
                 </div>
+                <!-- Notify Owner Modal -->
+                <div class="modal fade" id="notifyOwnerModal" tabindex="-1" aria-labelledby="notifyOwnerModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="notifyOwnerModalLabel">Notify Owner</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="notifyOwnerForm">
+                                    <div class="mb-3">
+                                        <label for="notifyMessage" class="form-label">Message to Owner</label>
+                                        <textarea class="form-control" id="notifyMessage" name="message" rows="3" maxlength="500" required placeholder="Describe where/how you found the item, or how to contact you."></textarea>
+                                    </div>
+                                    <input type="hidden" id="notifyItemId" name="item_id" value="{{ item.id }}">
+                                </form>
+                                <div id="notifyOwnerFeedback" class="mt-2"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" onclick="submitNotifyOwner()">Send Notification</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                function openNotifyModal() {
+                        var modal = new bootstrap.Modal(document.getElementById('notifyOwnerModal'));
+                        document.getElementById('notifyMessage').value = '';
+                        document.getElementById('notifyOwnerFeedback').innerHTML = '';
+                        modal.show();
+                }
+                function submitNotifyOwner() {
+                        const form = document.getElementById('notifyOwnerForm');
+                        const feedback = document.getElementById('notifyOwnerFeedback');
+                        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                        const data = new FormData(form);
+                        feedback.innerHTML = '<span class="text-info">Sending...</span>';
+                        fetch('/items/api/notify-owner/', {
+                                method: 'POST',
+                                headers: { 'X-CSRFToken': csrftoken },
+                                body: data
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                                if (data.success) {
+                                        feedback.innerHTML = '<span class="text-success">Notification sent to owner!</span>';
+                                } else {
+                                        feedback.innerHTML = '<span class="text-danger">' + (data.error || 'Failed to send notification.') + '</span>';
+                                }
+                        })
+                        .catch(() => {
+                                feedback.innerHTML = '<span class="text-danger">Failed to send notification.</span>';
+                        });
+                }
+                </script>
                 {% endif %}
 
                 {% if item.status == 'returned' and claim %}

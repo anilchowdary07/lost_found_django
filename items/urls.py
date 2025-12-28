@@ -1,3 +1,4 @@
+    path('api/notify-owner/', views.notify_owner, name='notify_owner'),
 from django.urls import path
 from . import views
 
