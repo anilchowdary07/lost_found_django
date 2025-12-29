@@ -2,7 +2,6 @@ import os
 from decouple import config
 
 # Email (Mailjet HTTP API via Anymail)
-INSTALLED_APPS += ['anymail']
 EMAIL_BACKEND = 'anymail.backends.mailjet.EmailBackend'
 ANYMAIL = {
     'MAILJET_API_KEY': config('MAILJET_API_KEY', default=''),
@@ -56,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'items',
     'accounts',
+    'anymail',
 ]
 
 MIDDLEWARE = [
