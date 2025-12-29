@@ -29,6 +29,7 @@ def signup(request):
                 subject = "Verify your email for Campus Lost & Found"
                 message = f"Hello {user.username},\n\nPlease verify your email by clicking the link below:\n{verify_url}\n\nIf you did not sign up, ignore this email."
                 send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=True)
+                messages.success(request, f'A verification link has been sent to {user.email}. Please check your inbox to activate your account.', extra_tags='success')
                 return render(request, 'accounts/verify_notice.html', {'email': user.email})
             except Exception as e:
                 messages.error(request, f'An error occurred during signup: {str(e)}', extra_tags='error')
@@ -65,20 +66,21 @@ def login_view(request):
     if request.method == 'POST':
         form = EmailLoginForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email'].lower()
+            identifier = form.cleaned_data['email'].strip().lower()
             password = form.cleaned_data['password']
-            try:
-                from django.contrib.auth.models import User
-                user = User.objects.filter(email=email).first()
-                if user is not None:
-                    user_auth = authenticate(request, username=user.username, password=password)
-                    if user_auth is not None:
-                        login(request, user_auth)
-                        messages.success(request, f'Welcome back, {user_auth.username}!', extra_tags='success')
-                        return redirect('items:dashboard')
-                messages.error(request, 'Invalid email or password.', extra_tags='error')
-            except Exception as e:
-                messages.error(request, f'An error occurred during login: {str(e)}', extra_tags='error')
+            from django.contrib.auth.models import User
+            user = User.objects.filter(email=identifier).first()
+            if user is None:
+                user = User.objects.filter(username=identifier).first()
+            print('Login attempt:', identifier, '| Found user:', user.username if user else None, '| Active:', user.is_active if user else None)
+            if user is not None:
+                user_auth = authenticate(request, username=user.username, password=password)
+                print('Auth result:', user_auth)
+                if user_auth is not None:
+                    login(request, user_auth)
+                    messages.success(request, f'Welcome back, {user_auth.username}!', extra_tags='success')
+                    return redirect('items:dashboard')
+            messages.error(request, 'Invalid email/username or password.', extra_tags='error')
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -115,9 +117,9 @@ def profile(request):
 
     # Get karma info
     karma_points = get_user_karma(request.user)
-    user_rank = get_user_rank(request.user)
+    # Only show rank if user has at least 50 karma points (same as leaderboard)
+    user_rank = get_user_rank(request.user) if karma_points >= 50 else None
     points_to_next_level = max(0, 1000 - karma_points)
-    progress_percentage = min(100, (karma_points / 10)) if karma_points > 0 else 0
     progress_percentage = min(100, (karma_points / 1000) * 100) if karma_points > 0 else 0
 
     context = {

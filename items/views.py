@@ -22,15 +22,7 @@ def notify_owner(request):
             return JsonResponse({'error': 'Notify Owner is only for lost items.'}, status=400)
         if item.user == request.user:
             return JsonResponse({'error': 'You cannot notify yourself.'}, status=400)
-        # Create in-app notification
-        from .models import Notification
-        notif_msg = f"{request.user.username} says: {message}"
-        Notification.objects.create(
-            recipient=item.user,
-            claim=None,
-            message=notif_msg
-        )
-        # Send email
+        # Only send email, do not create Notification (claim is required)
         from django.core.mail import send_mail
         from django.conf import settings
         subject = f"Someone found your lost item: {item.title}"
@@ -483,7 +475,7 @@ def mark_notification_read_view(request, notification_id):
 
 
 def leaderboard(request):
-    leaderboard_users = get_leaderboard(limit=100)
+    leaderboard_users = get_leaderboard(limit=20)
 
     context = {
         'leaderboard': leaderboard_users,

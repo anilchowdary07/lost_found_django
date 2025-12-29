@@ -57,6 +57,7 @@ class SignUpForm(UserCreationForm):
         email = self.cleaned_data.get('email')
         if not email.lower().endswith('@vitapstudent.ac.in'):
             raise forms.ValidationError('Only @vitapstudent.ac.in email addresses are allowed.')
+        # Block if any user (active or inactive) exists with this email
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError('This email is already registered.')
         return email

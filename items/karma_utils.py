@@ -13,8 +13,9 @@ def award_karma_points(user, points=KARMA_POINTS_PER_RETURN):
     return profile
 
 
-def get_leaderboard(limit=100):
-    return UserProfile.objects.all().order_by('-karma_points')[:limit]
+def get_leaderboard(limit=20):
+    # Only users with at least 50 karma points, top 20
+    return UserProfile.objects.filter(karma_points__gte=50).order_by('-karma_points')[:limit]
 
 
 def get_user_karma(user):

@@ -403,8 +403,13 @@
         </div>
         <div class="user-stat-card">
             <span class="user-stat-icon">🏅</span>
-            <span class="user-stat-number">#{{ user_rank }}</span>
-            <span class="user-stat-label">Your Rank</span>
+            {% if user_karma >= 50 and user_rank %}
+                <span class="user-stat-number">#{{ user_rank }}</span>
+                <span class="user-stat-label">Your Rank</span>
+            {% else %}
+                <span class="user-stat-number" style="color:#64748b;">--</span>
+                <span class="user-stat-label">Earn 50+ karma to rank</span>
+            {% endif %}
         </div>
         <div class="user-stat-card">
             <span class="user-stat-icon">🔄</span>

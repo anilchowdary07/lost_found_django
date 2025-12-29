@@ -96,10 +96,11 @@
         .stat-card {
             background: #f1f5f9;
             border-radius: 1rem;
-            padding: 1.2rem 1rem;
-            margin-bottom: 1rem;
+            padding: 1.1rem 1.2rem;
+            min-width: 130px;
             text-align: center;
             box-shadow: 0 2px 8px #6366f122;
+            margin-bottom: 1rem;
         }
         .stat-icon {
             font-size: 2rem;
@@ -256,6 +257,7 @@
             }
             .stat-card {
                 padding: 0.8rem 0.5rem;
+                min-width: 90px;
             }
             .profile-section {
                 padding: 1rem 0.5rem;
@@ -289,9 +291,15 @@
             </span>
         {% endif %}
     </h1>
+    <div style="font-size:1.05rem; color:#6366f1; margin-bottom:0.7rem;">
+        <i class="fas fa-envelope me-1"></i>{{ user.email }}
+    </div>
     <p class="profile-subtitle" style="font-size:1.1rem; color:#64748b; margin-bottom:1.1rem;">Track your contributions to the campus community and manage your account.</p>
-    {% if user_rank and user_rank > 0 %}
+    {% if user_rank %}
         <div class="rank-badge mt-3" style="
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -315,27 +323,55 @@
             <span style="font-size: 1.7rem; margin-right: 0.7rem; filter: drop-shadow(0 2px 2px #6366f1cc);">🏆</span>
             <span style="display:inline-block; vertical-align:middle;">Rank <span style="font-size:1.25em; font-weight:900; color:#fff; text-shadow:0 2px 4px #6366f1cc,0 1px 0 #fbbf24;">#{{ user_rank }}</span> in <span style="font-weight:700; color:#e0e7ff; text-shadow:0 1px 2px #6366f1aa;">Campus Heroes</span></span>
         </div>
+    {% elif karma_points < 50 %}
+        <div style="display: flex; justify-content: center; width: 100%;">
+            <div class="rank-badge mt-3" style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 1.1rem;
+                background-color: #e5e7eb;
+                color: #64748b;
+                font-weight: 700;
+                font-size: 1.1rem;
+                border-radius: 2.2rem;
+                padding: 1.1rem 4.5rem 1.1rem 2.1rem;
+                box-shadow: 0 2px 8px #6366f122;
+                margin-bottom: 1.5rem;
+                border: 2px solid #e0e7ff;
+                letter-spacing: 0.01em;
+                min-width: 680px;
+                max-width: 100vw;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                text-align: center;
+            ">
+                <span style="font-size: 1.7rem; margin-right: 0.7rem; filter: drop-shadow(0 2px 2px #6366f1cc);">🏆</span>
+                <span style="display:inline-block; vertical-align:middle;">Earn at least <b>50 karma</b> to enter the Campus Heroes leaderboard!</span>
+            </div>
+        </div>
     {% endif %}
     <div class="motivational-banner" style="text-align:center; margin:1.2rem 0 0.5rem 0; font-size:1.08rem; color:#64748b;">
         <i class="fas fa-bolt me-2"></i>Keep helping others—your karma and rank grow with every good deed!
     </div>
     <div class="stats-flex" style="display:flex; justify-content:center; gap:1.5rem; flex-wrap:wrap; margin-top:1.5rem;">
-        <div class="stat-card" style="background:#f1f5f9; border-radius:1rem; padding:1.1rem 1.2rem; min-width:130px; text-align:center; box-shadow:0 2px 8px #6366f122;">
+        <div class="stat-card">
             <span class="stat-icon" style="font-size:1.7rem;">📦</span>
             <div class="stat-number" style="font-size:1.25rem; font-weight:700; color:#6366f1;">{{ reported_items }}</div>
             <div class="stat-label" style="font-size:0.93rem; color:#64748b;">Items Reported</div>
         </div>
-        <div class="stat-card" style="background:#f1f5f9; border-radius:1rem; padding:1.1rem 1.2rem; min-width:130px; text-align:center; box-shadow:0 2px 8px #6366f122;">
+        <div class="stat-card">
             <span class="stat-icon" style="font-size:1.7rem;">✅</span>
             <div class="stat-number" style="font-size:1.25rem; font-weight:700; color:#6366f1;">{{ claimed_items }}</div>
             <div class="stat-label" style="font-size:0.93rem; color:#64748b;">Items Claimed</div>
         </div>
-        <div class="stat-card" style="background:#f1f5f9; border-radius:1rem; padding:1.1rem 1.2rem; min-width:130px; text-align:center; box-shadow:0 2px 8px #6366f122;">
+        <div class="stat-card">
             <span class="stat-icon" style="font-size:1.7rem;">⭐</span>
             <div class="stat-number" style="font-size:1.25rem; font-weight:700; color:#6366f1;">{{ karma_points }}</div>
             <div class="stat-label" style="font-size:0.93rem; color:#64748b;">Karma Points</div>
         </div>
-        <div class="stat-card" style="background:#f1f5f9; border-radius:1rem; padding:1.1rem 1.2rem; min-width:130px; text-align:center; box-shadow:0 2px 8px #6366f122;">
+        <div class="stat-card">
             <span class="stat-icon" style="font-size:1.7rem;">🎯</span>
             <div class="stat-number" style="font-size:1.25rem; font-weight:700; color:#6366f1;">{{ user_rank|default:"-" }}</div>
             <div class="stat-label" style="font-size:0.93rem; color:#64748b;">Community Rank</div>

@@ -314,11 +314,7 @@
         <i class="fas fa-hand-holding-heart me-1"></i>Claim This Item
     </button>
     {% endif %}
-    {% if can_notify %}
-    <button class="btn btn-warning notify-btn" data-item-id="{{ item.id }}" data-item-title="{{ item.title }}" onclick="openNotifyModal()">
-        <i class="fas fa-bullhorn me-1"></i>Notify Owner
-    </button>
-    {% endif %}
+    {# Only show Notify Owner button in main card, not sticky bar #}
     <button class="btn btn-share" id="shareBtn" onclick="copyItemLink(event)"><i class="fas fa-share-alt me-1"></i>Share</button>
 </div>
         <!-- Related Items Section -->
@@ -384,7 +380,7 @@
                         </button>
                         {% endif %}
                         {% if can_notify %}
-                        <button class="btn btn-warning notify-btn" data-item-id="{{ item.id }}" data-item-title="{{ item.title }}" onclick="openNotifyModal()">
+                        <button type="button" class="btn btn-warning notify-btn" data-item-id="{{ item.id }}" data-item-title="{{ item.title }}" onclick="openNotifyModal(event)">
                             <i class="fas fa-bullhorn me-1"></i>Notify Owner
                         </button>
                         {% endif %}
@@ -568,34 +564,53 @@
                     </div>
                 </div>
                 <script>
-                function openNotifyModal() {
-                        var modal = new bootstrap.Modal(document.getElementById('notifyOwnerModal'));
-                        document.getElementById('notifyMessage').value = '';
-                        document.getElementById('notifyOwnerFeedback').innerHTML = '';
-                        modal.show();
+                function openNotifyModal(e) {
+                    if (e) e.preventDefault();
+                    // Defensive: remove any stuck backdrops and modal-open class before showing
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.paddingRight = '';
+                    var modal = new bootstrap.Modal(document.getElementById('notifyOwnerModal'));
+                    document.getElementById('notifyMessage').value = '';
+                    document.getElementById('notifyOwnerFeedback').innerHTML = '';
+                    modal.show();
+                    // Defensive: reset scroll position after modal opens
+                    setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: 'instant' });
+                    }, 100);
                 }
                 function submitNotifyOwner() {
-                        const form = document.getElementById('notifyOwnerForm');
-                        const feedback = document.getElementById('notifyOwnerFeedback');
-                        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                        const data = new FormData(form);
-                        feedback.innerHTML = '<span class="text-info">Sending...</span>';
-                        fetch('/items/api/notify-owner/', {
-                                method: 'POST',
-                                headers: { 'X-CSRFToken': csrftoken },
-                                body: data
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                                if (data.success) {
-                                        feedback.innerHTML = '<span class="text-success">Notification sent to owner!</span>';
-                                } else {
-                                        feedback.innerHTML = '<span class="text-danger">' + (data.error || 'Failed to send notification.') + '</span>';
-                                }
-                        })
-                        .catch(() => {
-                                feedback.innerHTML = '<span class="text-danger">Failed to send notification.</span>';
-                        });
+                    const form = document.getElementById('notifyOwnerForm');
+                    const feedback = document.getElementById('notifyOwnerFeedback');
+                    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    const data = new FormData(form);
+                    feedback.innerHTML = '<span class="text-info">Sending...</span>';
+                        fetch('/api/notify-owner/', {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': csrftoken },
+                        body: data
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            feedback.innerHTML = '<span class="text-success">Notification sent to owner!</span>';
+                            // Close modal after short delay
+                            setTimeout(() => {
+                                var modalEl = document.getElementById('notifyOwnerModal');
+                                var modal = bootstrap.Modal.getInstance(modalEl);
+                                if (modal) modal.hide();
+                                // Remove any stuck backdrops
+                                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                                document.body.classList.remove('modal-open');
+                                document.body.style.paddingRight = '';
+                            }, 1200);
+                        } else {
+                            feedback.innerHTML = '<span class="text-danger">' + (data.error || 'Failed to send notification.') + '</span>';
+                        }
+                    })
+                    .catch(() => {
+                        feedback.innerHTML = '<span class="text-danger">Failed to send notification.</span>';
+                    });
                 }
                 </script>
                 {% endif %}
@@ -668,9 +683,18 @@
 </div>
 
 <script>
+
 function copyItemLink(e) {
     e.preventDefault();
     const url = window.location.href;
+    const title = document.title || 'Lost & Found Item';
+    // Prefer Web Share API if available
+    if (navigator.share) {
+        navigator.share({ title, url })
+            .then(() => showToast('Link shared!', 'success'))
+            .catch(() => fallbackCopyTextToClipboard(url));
+        return;
+    }
     // Try Clipboard API first
     if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(url).then(function() {

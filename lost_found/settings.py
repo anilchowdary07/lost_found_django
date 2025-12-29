@@ -9,6 +9,10 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('MAILJET_API_KEY', default='')
 EMAIL_HOST_PASSWORD = config('MAILJET_API_SECRET', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='your_verified_sender@example.com')
+
+# Custom password reset email templates
+PASSWORD_RESET_EMAIL_TEMPLATE_NAME = 'accounts/password_reset_email.html'
+PASSWORD_RESET_SUBJECT_TEMPLATE_NAME = 'accounts/password_reset_subject.txt'
 """
 Django settings for lost_found project.
 
