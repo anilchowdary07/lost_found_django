@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome | Campus Lost & Found</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<style>
+  .welcome-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #f8fafc;
+  }
+  .login-btn {
+    display: block;
+    margin: 40px auto 0 auto;
+    padding: 16px 48px;
+    font-size: 1.2rem;
+    border-radius: 32px;
+    background: rgba(30, 41, 59, 0.7);
+    color: #a5b4fc;
+    border: 2px solid #6366f1;
+    box-shadow: 0 0 24px 4px #6366f1cc, 0 8px 32px 0 rgba(31,38,135,0.18);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 8px #6366f1, 0 0 2px #fff;
+    transition: background 0.2s, color 0.2s, border 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .login-btn:hover {
+    background: #6366f1;
+    color: #fff;
+    border: 2px solid #a5b4fc;
+    box-shadow: 0 0 32px 8px #6366f1ee, 0 12px 32px 0 rgba(31,38,135,0.22);
+    text-shadow: 0 0 16px #fff, 0 0 4px #6366f1;
+    text-decoration: none;
+  }
+  .spline-3d {
+    width: 100vw;
+    height: 100vh;
+    min-height: 600px;
+    border: none;
+    display: block;
+  }
+</style>
+ <div class="welcome-container">
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.28/build/spline-viewer.js"></script>
+  <spline-viewer url="https://prod.spline.design/jYw7vBkNMLpas8p4/scene.splinecode" class="spline-3d"></spline-viewer>
+  <!-- No login button; click anywhere to redirect -->
+<script>
+  document.addEventListener('click', function() {
+    window.location.href = '/accounts/login/';
+  });
+</script>
+ </div>
+</body>
+</html>

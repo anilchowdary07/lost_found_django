@@ -1231,3 +1231,5 @@ def delete_item(request, item_id):
         return JsonResponse({"success": True, "redirect": "/items/lost/"})
     else:
         return JsonResponse({"success": True, "redirect": "/items/gallery/"})
+def welcome(request):
+    return render(request, 'welcome.html')

@@ -1,0 +1,25 @@
+Campus Lost & Found - System Architecture (Text Diagram)
+
++-------------------+
+|   User Devices    |
+| (Browser/Mobile)  |
++--------+----------+
+         |
+         v
++--------+----------+
+|   Django Backend  |
+| (Deployed App)    |
++--------+----------+
+   |           |
+   |           |
+   v           v
++--------+   +-------------------+
+|Supabase|   |    Cloudinary     |
+| (DB)  |   | (Image Hosting)   |
++--------+   +-------------------+
+
+Legend:
+- All user/item/claim/notification data is stored in Supabase (PostgreSQL).
+- All item images are uploaded to and served from Cloudinary.
+- Users interact with the Django backend via web/mobile browsers.
+- Django handles authentication, business logic, and email notifications.

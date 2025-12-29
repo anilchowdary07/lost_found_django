@@ -4,7 +4,8 @@ from . import views
 app_name = 'items'
 
 urlpatterns = [
-    path('', views.dashboard, name='dashboard'),
+    path('', views.welcome, name='welcome'),
+    path('dashboard/', views.dashboard, name='dashboard'),
     path('report/', views.report_item, name='report_item'),
     path('api/claim/', views.claim_item, name='claim_item'),
     path('api/search-nearby/', views.search_nearby_items, name='search_nearby_items'),
